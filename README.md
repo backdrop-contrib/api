@@ -14,12 +14,12 @@ are made on the code format. These are all Backdrop coding conventions (see
 https://api.backdropcms.org/php-standards for more details and suggestions).
 
 1. All documentation blocks must use the syntax:
-```
-/**
- * Documentation here.
- */
-```
-   The leading spaces are required.
+   ```
+   /**
+     * Documentation here.
+     */
+   ```
+   A leading space before the asterisk on subsequent lines is required.
 
 2. When documenting a function, constant, class, etc., the documentation block
    must immediately precede the item it documents, with no intervening blank
