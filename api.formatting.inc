@@ -18,16 +18,16 @@
  *   Can omit if namespaces are not relevant.
  * @param int $class_did
  *   Documentation ID of the class the code is in (if any).
- * @param bool $is_drupal
- *   (optional) If set explicitly to FALSE, omit the Drupal-specific link steps.
+ * @param bool $is_backdrop
+ *   (optional) If set explicitly to FALSE, omit the Backdrop-specific link steps.
  *
  * @return string
  *   Code with function names formatted as links.
  *
  * @see api_link_documentation
  */
-function api_link_code($code, $branch, $file_did = NULL, $class_did = NULL, $is_drupal = TRUE) {
-  if ($is_drupal) {
+function api_link_code($code, $branch, $file_did = NULL, $class_did = NULL, $is_backdrop = TRUE) {
+  if ($is_backdrop) {
     $steps = array('code hook name', 'code alter hook name', 'code theme hook name', 'code function', 'code function declared', 'code member', 'code string', 'code string theme', 'yaml string', 'service', 'yaml file', 'yaml reference', 'annotation string', 'code global', 'code class', 'annotation class');
   }
   else {
@@ -54,15 +54,15 @@ function api_link_code($code, $branch, $file_did = NULL, $class_did = NULL, $is_
  *   TRUE. Otherwise, just try to link words with backslashes in them.
  * @param bool $aggressive_topics
  *   For use in @see only, if TRUE try linking every paragraph as a topic name.
- * @param bool $is_drupal
- *   (optional) If set explicitly to FALSE, omit the Drupal-specific link steps.
+ * @param bool $is_backdrop
+ *   (optional) If set explicitly to FALSE, omit the Backdrop-specific link steps.
  *
  * @return string
  *   Documentation with function names formatted as links.
  *
  * @see api_link_code
  */
-function api_link_documentation($documentation, $branch, $file_did = NULL, $class_did = NULL, $aggressive_classes = FALSE, $aggressive_topics = FALSE, $is_drupal = TRUE) {
+function api_link_documentation($documentation, $branch, $file_did = NULL, $class_did = NULL, $aggressive_classes = FALSE, $aggressive_topics = FALSE, $is_backdrop = TRUE) {
 
   // First make as many links as possible in the text. To do that, we have to
   // find a branch to use if possible, and figure out what stages we need.
@@ -73,7 +73,7 @@ function api_link_documentation($documentation, $branch, $file_did = NULL, $clas
 
   // Start with the code-related stages, for the @code sections. Follow with
   // the basic documentation stages.
-  if ($is_drupal) {
+  if ($is_backdrop) {
     $stages = array('code hook name', 'code alter hook name', 'code theme hook name', 'code function', 'code function declared', 'code member', 'code string', 'code string theme', 'yaml string', 'service', 'yaml file', 'annotation string', 'code global', 'code class', 'annotation class', 'tags', 'link', 'function');
   }
   else {
@@ -98,7 +98,7 @@ function api_link_documentation($documentation, $branch, $file_did = NULL, $clas
   // Now remove escaping from \@.
   $documentation = preg_replace('!\\\@!', '@', $documentation);
 
-  // Now use the standard Drupal URL filter to make links out of bare URLs in
+  // Now use the standard Backdrop URL filter to make links out of bare URLs in
   // the text.
   $filter = new stdClass();
   $filter->callback = '_filter_url';
@@ -488,7 +488,7 @@ function api_split($pattern, $subject, $callback_match = NULL, $callback_match_a
  * @param $use_php
  *   TRUE if links to functions found in PHP reference branches should be
  *   checked for and made; FALSE to skip this (normally only set to TRUE if
- *   this is a Drupal-specific thing like a hook name and thus looking for PHP
+ *   this is a Backdrop-specific thing like a hook name and thus looking for PHP
  *   reference functions would be pointless). API reference branches are always
  *   checked regardless of $use_php.
  * @param $prepend_if_not_found
@@ -543,7 +543,7 @@ function api_link_name($name, $branch, $prepend = '', $append = '', $file_did = 
   // Get some information we will need in several places below.
   $nameinfo = api_get_namespace_info($file_did);
   $namespaced_name = api_full_classname($name, $nameinfo['namespace'], $nameinfo['use_alias']);
-  $core_compatibility = ($branch) ? $branch->core_compatibility : variable_get('api_default_core_compatibility', '');
+  $core_compatibility = ($branch) ? $branch->core_compatibility : config_get('api.settings', 'default_core_compatibility');
   $api_branches = api_get_php_branches();
 
   // If we get here, we're looking to match some kind of documentation object.
@@ -1083,7 +1083,7 @@ function api_link_member_name($text, $branch, $prepend = '', $append = '', $file
 
   // Get some information we will need in several places below.
   $nameinfo = api_get_namespace_info($file_did);
-  $core_compatibility = ($branch) ? $branch->core_compatibility : variable_get('api_default_core_compatibility', '');
+  $core_compatibility = ($branch) ? $branch->core_compatibility : config_get('api.settings', 'default_core_compatibility');
   $api_branches = api_get_php_branches();
 
   // Convert parent references to the name of the parent class, which must be
@@ -1486,7 +1486,7 @@ function api_get_namespace_info($file_did = NULL) {
   foreach ($values as $info) {
     // Start namespaces with backslash.
     $name = $info->class_name;
-    if (drupal_substr($name, 0, 1) != '\\') {
+    if (backdrop_substr($name, 0, 1) != '\\') {
       $name = '\\' . $name;
     }
 

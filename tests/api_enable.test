@@ -25,14 +25,14 @@ class ApiEnableTestCase extends ApiWebPagesBaseTest {
 
   function setUp() {
     // Start with only the support modules enabled.
-    DrupalWebTestCase::setUp('ctools', 'gplib', 'node', 'dblog', 'views', 'comment');
+    BackdropWebTestCase::setUp('node', 'dblog', 'views', 'comment');
 
-    $this->super_user = $this->drupalCreateUser(array(
+    $this->super_user = $this->backdropCreateUser(array(
       'access content',
       'access administration pages',
       'access site reports',
     ));
-    $this->drupalLogin($this->super_user);
+    $this->backdropLogin($this->super_user);
 
     $this->cronRun();
     $this->checkAndClearLog(array($this->cron_message));
@@ -61,27 +61,27 @@ class ApiEnableTestCase extends ApiWebPagesBaseTest {
     $this->checkAndClearLog(array($this->cron_message), array($this->php_message));
 
     // Update user for API module functionality.
-    $this->super_user = $this->drupalCreateUser(array(
+    $this->super_user = $this->backdropCreateUser(array(
       'access API reference',
       'administer API reference',
       'access content',
       'access administration pages',
       'access site reports',
     ));
-    $this->drupalLogin($this->super_user);
+    $this->backdropLogin($this->super_user);
 
     // Visit the API module admin page, to turn on API cron. Run cron and
     // verify that it does the API cron function this time.
-    $this->drupalGet('admin/config/development/api');
+    $this->backdropGet('admin/config/development/api');
     $this->cronRun();
     $this->checkAndClearLog(array($this->cron_message, $this->php_message));
 
     // Set the cron time for the PHP branch to weekly, so it doesn't get parsed
     // again. Set up a new branch. Run cron and verify that the PHP branch is
     // not parsed again, but the new branch is parsed (at least partially).
-    $this->drupalGet('admin/config/development/api/php_branches');
+    $this->backdropGet('admin/config/development/api/php_branches');
     $this->clickLink('edit');
-    $this->drupalPost(NULL, array(
+    $this->backdropPost(NULL, array(
         'update_frequency' => 604800,
       ),
       t('Save branch'));
@@ -106,10 +106,10 @@ class ApiEnableTestCase extends ApiWebPagesBaseTest {
     // Spot check to verify that the shutdown function has run and all files are
     // parsed: check a class page and see if methods are there, and check a
     // function page and verify that calls are there.
-    $this->drupalGet('api/' . $this->branch_info['project'] . '/classes.php/class/SubSample');
+    $this->backdropGet('api/' . $this->branch_info['project'] . '/classes.php/class/SubSample');
     $this->assertLink('Sample::baz', 0, 'Inherited method is shown');
     $this->assertLink('SubSample::bar', 0, 'Direct method is shown');
-    $this->drupalGet('api/' . $this->branch_info['project'] . '/sample.php/function/sample_function');
+    $this->backdropGet('api/' . $this->branch_info['project'] . '/sample.php/function/sample_function');
     $this->assertRaw('10 calls to sample_function()', 'Calling text is shown');
     $this->assertRaw("1 string reference to 'sample_function'", 'String reference link is shown');
 
@@ -122,7 +122,7 @@ class ApiEnableTestCase extends ApiWebPagesBaseTest {
     $this->resetAll();
     $this->assertTrue(module_exists('comment'), 'Comment module is enabled');
     // Update user for comment module functionality.
-    $this->super_user = $this->drupalCreateUser(array(
+    $this->super_user = $this->backdropCreateUser(array(
       'access API reference',
       'administer API reference',
       'access content',
@@ -132,14 +132,14 @@ class ApiEnableTestCase extends ApiWebPagesBaseTest {
       'post comments',
       'skip comment approval',
     ));
-    $this->drupalLogin($this->super_user);
+    $this->backdropLogin($this->super_user);
 
-    $this->drupalPost('admin/config/development/api/comments', array(
-        'comment' => 2,
-      ), t('Save comment settings'));
-    $this->clickLink(t('Apply current default comment settings to existing API pages'));
-    $this->drupalGet('api/' . $this->branch_info['project'] . '/classes.php/class/Sample');
-    $this->drupalPost(NULL, array(
+    $this->backdropPost('admin/structure/types/manage/api', array(
+      'comment_default' => 2,
+    ), t('Save comment settings'));
+    db_query("UPDATE {node} SET comment = 2 WHERE type = 'api'");
+    $this->backdropGet('api/' . $this->branch_info['project'] . '/classes.php/class/Sample');
+    $this->backdropPost(NULL, array(
         'subject' => 'Subject 1',
         'comment_body[und][0][value]' => 'Comment 1 body',
       ), t('Save'));
@@ -150,9 +150,9 @@ class ApiEnableTestCase extends ApiWebPagesBaseTest {
 
     // Set the PHP branch to update every cron run, and verify it gets updated
     // at next cron run.
-    $this->drupalGet('admin/config/development/api/php_branches');
+    $this->backdropGet('admin/config/development/api/php_branches');
     $this->clickLink('edit', 0);
-    $this->drupalPost(NULL, array(
+    $this->backdropPost(NULL, array(
         'update_frequency' => 1,
       ),
       t('Save branch'));

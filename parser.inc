@@ -22,18 +22,18 @@
  *   File name to store in the database for this file.
  */
 function api_parse_file($callback, $file_path, $branch, $file_name) {
-  // See if this is a Drupal file or a Drupal-excluded file.
-  $drupal_regexps = (isset($branch->exclude_drupalism_regexp) ? explode("\n", $branch->exclude_drupalism_regexp) : array());
-  $drupal_regexps = array_filter(array_map('trim', $drupal_regexps));
-  $is_drupal = TRUE;
-  foreach ($drupal_regexps as $regexp) {
+  // See if this is a Backdrop file or Backdrop-excluded file.
+  $backdrop_regexps = (isset($branch->exclude_backdropism_regexp) ? explode("\n", $branch->exclude_backdropism_regexp) : array());
+  $backdrop_regexps = array_filter(array_map('trim', $backdrop_regexps));
+  $is_backdrop = TRUE;
+  foreach ($backdrop_regexps as $regexp) {
     if (preg_match($regexp, $file_path)) {
-      $is_drupal = FALSE;
+      $is_backdrop = FALSE;
       break;
     }
   }
 
-  $basename = drupal_basename($file_name);
+  $basename = backdrop_basename($file_name);
   $docblock = array(
     'object_name' => $file_name,
     'branch' => $branch,
@@ -50,7 +50,7 @@ function api_parse_file($callback, $file_path, $branch, $file_name) {
     'class' => '',
     'namespaced_name' => '',
     'modifiers' => '',
-    'is_drupal' => $is_drupal,
+    'is_backdrop' => $is_backdrop,
   );
 
   $callback($docblock);
@@ -94,9 +94,9 @@ function api_parse_text_file($docblock, $escape_html = FALSE) {
       return;
     }
     // Avoid timeouts in Grammar Parser, but do not run forever in case it
-    // has a major problem. 10 minutes should be plenty. Drupal cron normally
+    // has a major problem. 10 minutes should be plenty. Backdrop cron normally
     // has a limit of 4 minutes. This will reset timing counter to 0 also.
-    drupal_set_time_limit(600);
+    backdrop_set_time_limit(600);
     $editor = PGPEditor::getInstance();
     $docblock['content'] = $editor->commentToString(array('value' => $matches[0]));
   }
@@ -163,9 +163,9 @@ function api_parse_php_file($docblock) {
 
   // Build grammar statements.
   // Avoid timeouts in Grammar Parser, but do not run forever in case it
-  // has a major problem. 10 minutes should be plenty. Drupal cron normally
+  // has a major problem. 10 minutes should be plenty. Backdrop cron normally
   // has a limit of 4 minutes. This will reset timing counter to 0 also.
-  drupal_set_time_limit(600);
+  backdrop_set_time_limit(600);
   $editor = PGPEditor::getInstance();
   $reader = $editor->getReader();
   $reader->setPreserveWhitespace(FALSE);
@@ -178,7 +178,7 @@ function api_parse_php_file($docblock) {
 
     // This is a text file or template file with no declarations of functions,
     // constants, etc. But we do want to track references in it.
-    $docblock['code'] = api_format_php($docblock['source'], $docblock['references'], TRUE, TRUE, $docblock['is_drupal']);
+    $docblock['code'] = api_format_php($docblock['source'], $docblock['references'], TRUE, TRUE, $docblock['is_backdrop']);
 
     api_save_documentation(array($docblock));
     // Free up memory.
@@ -193,7 +193,7 @@ function api_parse_php_file($docblock) {
   // Reserve the first array slot for the file documentation block. Note that
   // we will only keep some of the references we parsed out.
   $references = array();
-  $docblock['code'] = api_format_php($docblock['source'], $references, TRUE, TRUE, $docblock['is_drupal']);
+  $docblock['code'] = api_format_php($docblock['source'], $references, TRUE, TRUE, $docblock['is_backdrop']);
   $docblocks = array($docblock);
 
   // Set default documentation block array for items other than the file.
@@ -209,7 +209,7 @@ function api_parse_php_file($docblock) {
     'start_line' => 0,
     'namespaced_name' => '',
     'modifiers' => '',
-    'is_drupal' => $docblock['is_drupal'],
+    'is_backdrop' => $docblock['is_backdrop'],
   );
 
   $found_references = api_documentation_loop($statements, $default_block, $docblocks);
@@ -283,11 +283,11 @@ function api_parse_yaml_file($docblock) {
 
   // Find potential references, which are array values that look like they
   // could be callback function names, in addition to some array keys. The
-  // level of keys we want depends on (a) if it's a Drupal file, and (b) the
+  // level of keys we want depends on (a) if it's a Backdrop file, and (b) the
   // file extension.
   $key_level = 0;
   $is_services = FALSE;
-  if ($docblock['is_drupal']) {
+  if ($docblock['is_backdrop']) {
     $basename = $docblock['basename'];
     $matches = array();
     if (preg_match('|\.([^.]+)\.yml$|', $basename, $matches)) {
@@ -561,7 +561,7 @@ function api_documentation_loop($statements, $default_block, &$docblocks) {
         $docblock['content'] = $editor->commentToString($statement->comment);
         $statement->comment = '';
         $references = array();
-        $docblock['code'] = api_format_php("<?php\n" . $statement->toString() . "\n?" . ">", $references, FALSE, ($statement->type == T_FUNCTION), $docblock['is_drupal']);
+        $docblock['code'] = api_format_php("<?php\n" . $statement->toString() . "\n?" . ">", $references, FALSE, ($statement->type == T_FUNCTION), $docblock['is_backdrop']);
 
         if (isset($statement->modifiers) && !$statement->modifiers->isEmpty()) {
           $docblock['modifiers'] = $statement->modifiers->toString();
@@ -723,7 +723,7 @@ function api_save_documentation($docblocks) {
     $annotation_matches = array();
     $docblock['annotation_class'] = FALSE;
     if (preg_match('/' . API_RE_TAG_START . 'Annotation' . API_RE_WORD_BOUNDARY_END . '/', $docblock['content'], $annotation_matches)) {
-      if ($docblock['is_drupal']) {
+      if ($docblock['is_backdrop']) {
         $docblock['content'] = str_replace($annotation_matches[0], "\n@ingroup annotation\n", $docblock['content']);
       }
       $docblock['annotation_class'] = TRUE;
@@ -898,14 +898,14 @@ function api_save_documentation($docblocks) {
 
     if ($docblock['did'] > 0) {
       _api_add_text_defaults($docblock, 'api_documentation');
-      drupal_write_record('api_documentation', $docblock, 'did');
+      backdrop_write_record('api_documentation', $docblock, 'did');
     }
     else {
       $nid = api_new_documentation_node();
       $docblock['did'] = $nid;
       $docblock['branch_id'] = $docblocks[0]['branch']->branch_id;
       _api_add_text_defaults($docblock, 'api_documentation');
-      drupal_write_record('api_documentation', $docblock);
+      backdrop_write_record('api_documentation', $docblock);
     }
 
     // Keep track of class membership
@@ -941,7 +941,7 @@ function api_save_documentation($docblocks) {
       case 'file':
         // Note that this will set the 'queued' field back to zero, since
         // $docblock['queued'] is set to 0 up at the top of api_parse_file().
-        drupal_write_record('api_file', $docblock, 'did');
+        backdrop_write_record('api_file', $docblock, 'did');
         api_replace_references($docblock['branch'], $docblock['did'], $docblock['object_name'], $docblock['references'], TRUE, $namespace, $use_aliases);
         break;
 
@@ -1268,7 +1268,7 @@ function api_replace_references($branch, $did, $name, $references, $do_namespace
  *
  * First escapes all HTML tags. Then processes links and code blocks, and
  * converts newlines into paragraphs. Note that this function does not do any
- * Drupal-specific formatting, aside from formatting plugin annotation, which
+ * Backdrop-specific formatting, aside from formatting plugin annotation, which
  * should be fine for vendor files as well.
  *
  * @param string $documentation
@@ -1549,13 +1549,13 @@ function api_documentation_summary($documentation) {
  *   integer to start numbering at that line number.
  * @param $track_references
  *   TRUE (default) to track references, FALSE to skip reference tracking.
- * @param $is_drupal
- *   TRUE (default) to use Drupal-specific parsing; FALSE to skip Drupalisms.
+ * @param $is_backdrop
+ *   TRUE (default) to use Backdrop-specific parsing; FALSE to skip Backdropisms.
  *
  * @return
  *   HTML-formatted code, with spans enclosing various PHP elements.
  */
-function api_format_php($code, &$references, $number = FALSE, $track_references = TRUE, $is_drupal = TRUE) {
+function api_format_php($code, &$references, $number = FALSE, $track_references = TRUE, $is_backdrop = TRUE) {
   // Check for invalid Unicode, which screws everything up.
   if (!mb_check_encoding($code, 'UTF-8')) {
     return t('Non-displayable characters.');
@@ -1784,7 +1784,7 @@ function api_format_php($code, &$references, $number = FALSE, $track_references 
             }
             elseif (preg_match("|^'" . API_RE_FILENAME . "'$|", $value)) {
               // Some of these may be quite long, so truncate.
-              $newname = str_replace("'", '', drupal_substr($value, 0, 127));
+              $newname = str_replace("'", '', backdrop_substr($value, 0, 127));
               $references['potential file'][$newname] = $newname;
             }
           }
@@ -1900,7 +1900,7 @@ function api_format_php($code, &$references, $number = FALSE, $track_references 
           $declaring = FALSE;
 
           // Save $invoke_type state.
-          if ($is_drupal) {
+          if ($is_backdrop) {
             if ($value == 'theme') {
               $invoke_type = 'theme';
               $target_paren_count = $paren_count + 1;
@@ -1909,7 +1909,7 @@ function api_format_php($code, &$references, $number = FALSE, $track_references 
               $invoke_type = 'hook';
               $target_paren_count = $paren_count + 1;
             }
-            elseif (in_array($value, array('drupal_alter', 'alter'))) {
+            elseif (in_array($value, array('backdrop_alter', 'alter'))) {
               $invoke_type = 'alter';
               $target_paren_count = $paren_count + 1;
             }
@@ -2150,7 +2150,7 @@ function api_reference($branch, $to_type = '', $to_name = '', $from_did = '', $w
   }
 
   // Avoid trying to save really long object names.
-  $to_name = drupal_substr($to_name, 0, 127);
+  $to_name = backdrop_substr($to_name, 0, 127);
 
   if ($to_type != 'function' || !$is_php_function[$to_name]) {
     if ($wait) {
@@ -2237,10 +2237,10 @@ function api_namespace($file_did, $type = '', $alias = '', $class = '', $wait = 
  * @see api_shutdown()
  */
 function api_schedule_shutdown() {
-  $scheduled = &drupal_static(__FUNCTION__, FALSE);
+  $scheduled = &backdrop_static(__FUNCTION__, FALSE);
 
   if (!$scheduled) {
-    drupal_register_shutdown_function('api_shutdown');
+    backdrop_register_shutdown_function('api_shutdown');
     $scheduled = TRUE;
   }
 }
@@ -2255,7 +2255,7 @@ function api_schedule_shutdown() {
  *   Array of the touched class IDs.
  */
 function api_touched($class_did = 0) {
-  $classes = &drupal_static(__FUNCTION__, array());
+  $classes = &backdrop_static(__FUNCTION__, array());
 
   if ($class_did) {
     $classes[$class_did] = $class_did;
@@ -2617,7 +2617,7 @@ function _api_update_class_reference_info($did, $parent_info, $member_info) {
 function _api_calc_class_members($did, $parent_info, $member_info) {
   // We will most likely encounter a class multiple times while going up
   // the hierarchy, so cache results.
-  $cache = &drupal_static(__FUNCTION__, array());
+  $cache = &backdrop_static(__FUNCTION__, array());
 
   $members = array(
     'function' => array(),
@@ -2690,7 +2690,7 @@ function _api_find_trait_aliases($did) {
 function _api_make_bare_member_list($did, $member_info) {
   // We will most likely encounter a class multiple times while going up
   // the hierarchy, so cache results.
-  $cache = &drupal_static(__FUNCTION__, array());
+  $cache = &backdrop_static(__FUNCTION__, array());
 
   if (isset($cache[$did])) {
     return $cache[$did];
@@ -2774,7 +2774,7 @@ function _api_member_list_merge(&$members, $parent_members, $aliases) {
  *   Documentation object, or NULL if not found.
  */
 function _api_bare_object_load($did, $type = '') {
-  $cache = &drupal_static(__FUNCTION__, array());
+  $cache = &backdrop_static(__FUNCTION__, array());
 
   if (!is_numeric($did)) {
     return NULL;
@@ -2844,7 +2844,7 @@ function _api_has_documentation($object) {
  * @see api_update_branch_files()
  */
 function api_update_all_branches() {
-  $queue = DrupalQueue::get('api_branch_update');
+  $queue = BackdropQueue::get('api_branch_update');
 
   // Check the files branches to see what needs updates.
   foreach (api_get_branches(TRUE) as $branch) {
@@ -2852,7 +2852,7 @@ function api_update_all_branches() {
       // Add to queue and mark as queued.
       $queue->createItem(array('type' => 'files', 'branch_id' => $branch->branch_id));
       $branch->queued = time();
-      drupal_write_record('api_branch', $branch, 'branch_id');
+      backdrop_write_record('api_branch', $branch, 'branch_id');
     }
     else {
       watchdog('api', 'Skipped update of %project branch %branch', array('%branch' => $branch->branch_name, '%project' => $branch->project));
@@ -2865,7 +2865,7 @@ function api_update_all_branches() {
       // Add to queue and mark as queued.
       $queue->createItem(array('type' => $branch->reference_type, 'branch_id' => $branch->branch_id));
       $branch->queued = time();
-      drupal_write_record('api_php_branch', $branch, 'branch_id');
+      backdrop_write_record('api_php_branch', $branch, 'branch_id');
     }
     else {
       watchdog('api', 'Skipped update of reference branch %branch', array('%branch' => $branch->title));
@@ -2888,12 +2888,12 @@ function api_update_all_branches() {
  * @see api_update_all_branches()
  */
 function api_update_branch_php($branch) {
-  $response = drupal_http_request($branch->summary);
+  $response = backdrop_http_request($branch->summary);
   if ($response->code === '200') {
     $docblocks = array();
-    // Note that drupal_json_decode() passes TRUE to json_decode(), so that all
+    // Note that backdrop_json_decode() passes TRUE to json_decode(), so that all
     // returned data is associative arrays and not objects.
-    $data = drupal_json_decode($response->data);
+    $data = backdrop_json_decode($response->data);
     foreach ($data as $name => $item) {
       $docblocks[] = array(
         'branch_id' => $branch->branch_id,
@@ -2911,14 +2911,14 @@ function api_update_branch_php($branch) {
     // Mark the branch as having been updated.
     $branch->last_updated = time();
     $branch->queued = 0;
-    drupal_write_record('api_php_branch', $branch, array('branch_id'));
+    backdrop_write_record('api_php_branch', $branch, array('branch_id'));
     watchdog('api', 'Updated PHP branch %branch_name.', array('%branch_name' => $branch->title));
     return TRUE;
   }
 
   // We didn't get a good response.
   $branch->queued = 0;
-  drupal_write_record('api_php_branch', $branch, array('branch_id'));
+  backdrop_write_record('api_php_branch', $branch, array('branch_id'));
   watchdog('api', 'Bad HTTP response from PHP branch %branch_name.', array('%branch_name' => $branch->title), WATCHDOG_WARNING);
   return FALSE;
 }
@@ -2959,10 +2959,10 @@ function api_update_branch_api($branch) {
   // contained new data, but as a failsafe stop after 1000 pages.
   while ($found && $page < 1000) {
     $found = FALSE;
-    $response = @drupal_http_request($base_url . $page, array('timeout' => $timeout));
+    $response = @backdrop_http_request($base_url . $page, array('timeout' => $timeout));
     $page++;
     if (isset($response) && ($response->code === '200')) {
-      $data = drupal_json_decode($response->data);
+      $data = backdrop_json_decode($response->data);
       foreach ($data as $item) {
         $item = (array) $item;
         // Only save new items.
@@ -2984,14 +2984,14 @@ function api_update_branch_api($branch) {
     // Mark the branch as having been updated.
     $branch->last_updated = time();
     $branch->queued = 0;
-    drupal_write_record('api_php_branch', $branch, array('branch_id'));
+    backdrop_write_record('api_php_branch', $branch, array('branch_id'));
     watchdog('api', 'Updated API branch %branch_name in %count page requests.', array('%branch_name' => $branch->title, '%count' => $page));
     return TRUE;
   }
 
   // We didn't get a good response.
   $branch->queued = 0;
-  drupal_write_record('api_php_branch', $branch, array('branch_id'));
+  backdrop_write_record('api_php_branch', $branch, array('branch_id'));
   watchdog('api', 'No documentation was downloaded from API branch %branch_name.', array('%branch_name' => $branch->title), WATCHDOG_WARNING);
   return FALSE;
 }
@@ -3078,7 +3078,7 @@ function api_update_branch_files($branch) {
   if (!count($files_to_scan)) {
     watchdog('api', 'No files were found in %project branch %branch', array('%branch' => $branch->branch_name, '%project' => $branch->project), WATCHDOG_ERROR);
     $branch->queued = 0;
-    drupal_write_record('api_branch', $branch, array('branch_id'));
+    backdrop_write_record('api_branch', $branch, array('branch_id'));
     return FALSE;
   }
 
@@ -3112,7 +3112,7 @@ function api_update_branch_files($branch) {
         $new = TRUE;
       }
       if ($parse) {
-        $queue = DrupalQueue::get('api_parse');
+        $queue = BackdropQueue::get('api_parse');
         $queue->createItem(array('parser' => $parse_functions[$matches[1]], 'path' => $path, 'branch' => $branch, 'file' => $file_name, 'branch_name' => $branch->branch_name, 'timestamp' => time()));
 
         // Make sure this doesn't get added to the parse queue again.
@@ -3124,21 +3124,21 @@ function api_update_branch_files($branch) {
           $doc = array(
             'object_name' => $file_name,
             'file_name' => $file_name,
-            'title' => drupal_basename($file_name),
+            'title' => backdrop_basename($file_name),
             'object_type' => 'file',
             'branch_id' => $branch->branch_id,
             'queued' => time(),
             'did' => $nid,
           );
           _api_add_text_defaults($doc, 'api_documentation');
-          drupal_write_record('api_documentation', $doc);
-          drupal_write_record('api_file', $doc);
+          backdrop_write_record('api_documentation', $doc);
+          backdrop_write_record('api_file', $doc);
         }
         else {
           // Update the 'queued' field in the {api_file} table so this does not
           // get queued again.
           $file->queued = time();
-          drupal_write_record('api_file', $file, 'did');
+          backdrop_write_record('api_file', $file, 'did');
         }
       }
     }
@@ -3159,7 +3159,7 @@ function api_update_branch_files($branch) {
   // Mark the branch as having been updated.
   $branch->last_updated = time();
   $branch->queued = 0;
-  drupal_write_record('api_branch', $branch, array('branch_id'));
+  backdrop_write_record('api_branch', $branch, array('branch_id'));
   watchdog('api', 'Updated %project branch %branch_name.', array('%branch_name' => $branch->branch_name, '%project' => $branch->project));
 
   return TRUE;
@@ -3271,7 +3271,7 @@ function api_scan_directories($directories, $excluded_directories, $regexps) {
  * These cannot come from the schema, because TEXT fields have no defaults.
  *
  * @param $record
- *   Record about to be written to the database with drupal_write_record().
+ *   Record about to be written to the database with backdrop_write_record().
  * @param $table
  *   Table $record is going into.
  */
@@ -3308,13 +3308,12 @@ function _api_add_text_defaults(&$record, $table) {
  *   Node ID of the created node.
  */
 function api_new_documentation_node() {
-  $node = new stdClass();
-  $node->type = 'api';
-  $node->uid = 0;
-  if (module_exists('comment')) {
-    $node->comment =  variable_get('comment_api', COMMENT_NODE_OPEN);
-  }
-  node_save($node);
+  $node = new Node(array(
+    'type' => 'api',
+    'uid' => 0,
+    'status' => 1,
+  ));
+  $node->save();
 
   return $node->nid;
 }

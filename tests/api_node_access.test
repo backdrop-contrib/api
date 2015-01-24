@@ -30,8 +30,8 @@ class ApiNodeAccessTestCase extends ApiWebPagesBaseTest {
    */
   function testNodeAccess() {
     // Create a couple of nodes. There should already be plenty of API nodes.
-    $page = $this->drupalCreateNode();
-    $article = $this->drupalCreateNode(array('type' => 'article'));
+    $page = $this->backdropCreateNode();
+    $article = $this->backdropCreateNode(array('type' => 'article'));
     $branch = $this->getBranch();
     $object = api_object_load('sample_function', $branch, 'function', 'sample.php');
 

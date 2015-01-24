@@ -1,25 +1,25 @@
 API Module
+==========
+
 Generates and displays API documentation pages.
 
-GENERAL INFORMATION
-
 This is an implementation of a subset of the Doxygen documentation generator
-specification, tuned to produce output that best benefits the Drupal code base.
-It is designed to assume the code it documents follows Drupal coding
+specification, tuned to produce output that best benefits the Backdrop code base.
+It is designed to assume the code it documents follows Backdrop coding
 conventions, and supports Doxygen constructs as documented on
-http://drupal.org/node/1354.
+https://api.backdropcms.org/doc-standards.
 
 In addition to standard Doxygen syntax requirements, the following restrictions
-are made on the code format. These are all Drupal coding conventions (see
-http://drupal.org/node/1354 for more details and suggestions).
+are made on the code format. These are all Backdrop coding conventions (see
+https://api.backdropcms.org/php-standards for more details and suggestions).
 
 1. All documentation blocks must use the syntax:
-
+```
 /**
  * Documentation here.
  */
-
-The leading spaces are required.
+```
+   The leading spaces are required.
 
 2. When documenting a function, constant, class, etc., the documentation block
    must immediately precede the item it documents, with no intervening blank
@@ -44,28 +44,32 @@ following features:
    a document changes.
 
 
-INSTALLATION AND SETUP
+Installation and setup
+----------------------
 
 See http://drupal.org/node/1516558 for information on how to install and set up
 this module.
 
 
-VIEWS INTEGRATION
+Views Integration
+-----------------
 
 The API documentation is integrated with Views. Actually, most of the
 listing pages for the API module use Views, and you should be able to clone
 and modify these pages to make your own views if you want something different.
 
 
-SEARCH INTEGRATION
+Search Integration
+------------------
 
 If you enable the included "API Search Integration" module (machine name:
-api_search), as well as either the Drupal Core "Search" module or the
+api_search), as well as either the Backdrop Core "Search" module or the
 contributed Apache Solr search module, you can perform full-text searches
 on API documentation, just like your regular site content.
 
 
 Configuring Core Search
+-----------------------
 
 1. Enable the Core Search module and the included "API Search Integration"
 module.
@@ -88,6 +92,7 @@ node content on your site).
 
 
 Configuring Solr Search
+-----------------------
 
 This is a little more involved. Assuming you already have the Apache Solr
 module configured and working, and optionally the Facet API module,
@@ -122,3 +127,31 @@ admin/config/search/settings :
 - Make Apache Solr search the default search module
 
 8. You may need to set up permission "Use search" for appropriate roles.
+
+License
+-------
+
+This project is GPL v2 software. See the LICENSE.txt file in this directory for
+complete text.
+
+Maintainers
+-----------
+
+This module is currently seeking maintainers.
+
+Credits
+-------
+
+Ported to Backdrop CMS by Nate Haug (https://github.com/quicksketch).
+
+The bulk of this module was written and is maintained in the Drupal project
+(https://www.drupal.org/project/api) by:
+
+- Neil Drumm (https://www.drupal.org/u/drumm)
+- Jennifer Hodgdon (https://www.drupal.org/u/jhodgdon)
+
+This module also currently bundles the "grammar_parser" Drupal library
+(https://www.drupal.org/project/grammar_parser) that was written and is
+maintained by:
+
+- Jim Berry (https://www.drupal.org/u/solotandem)

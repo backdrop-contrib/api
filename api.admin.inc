@@ -13,12 +13,13 @@
  */
 function api_page_admin_overview() {
   // Turn on cron for the API module.
-  variable_set('api_do_cron', 1);
+  state_set('api_do_cron', 1);
 
   $output = array();
+  $config = config('api.settings');
 
   // Display settings form.
-  $output['admin_form'] = drupal_get_form('api_page_admin_form');
+  $output['admin_form'] = backdrop_get_form('api_page_admin_form');
 
   $output['status'] = array(
     '#type' => 'markup',
@@ -27,7 +28,7 @@ function api_page_admin_overview() {
 
   // Check whether there is a default branch, project, and core compatibility.
   $ok = TRUE;
-  $branch_id = variable_get('api_default_branch', NULL);
+  $branch_id = $config->get('default_branch');
   $branches = api_get_branches();
   if (!$branch_id || !isset($branches[$branch_id])) {
     $ok = FALSE;
@@ -36,8 +37,8 @@ function api_page_admin_overview() {
       '#markup' => '<p>' . t('You do not have a default branch set up.') . '</p>',
     );
   }
-  $project = variable_get('api_default_project', NULL);
-  $version = variable_get('api_default_core_compatibility', NULL);
+  $project = $config->get('default_project');
+  $version = $config->get('default_core_compatibility');
   if (!$project) {
     $ok = FALSE;
     $output['project_status'] = array(
@@ -87,7 +88,7 @@ function api_page_admin_overview() {
   );
   $rows = array();
 
-  $queue = DrupalQueue::get('api_parse');
+  $queue = BackdropQueue::get('api_parse');
   $num = $queue->numberOfItems();
   $rows[] = array(
     t('File parse'),
@@ -95,7 +96,7 @@ function api_page_admin_overview() {
     l(t('reset'), 'admin/config/development/api/reset_queue', array('attributes' => array('title' => t('Reset file parse queue')))),
   );
 
-  $queue = DrupalQueue::get('api_branch_update');
+  $queue = BackdropQueue::get('api_branch_update');
   $num = $queue->numberOfItems();
   $rows[] = array(
     t('Branch update'),
@@ -103,7 +104,7 @@ function api_page_admin_overview() {
     ''
   );
 
-  $queue = DrupalQueue::get('api_node_delete');
+  $queue = BackdropQueue::get('api_node_delete');
   $num = $queue->numberOfItems();
   $rows[] = array(
     t('Node cleanup'),
@@ -126,38 +127,59 @@ function api_page_admin_overview() {
  * @ingroup forms
  */
 function api_page_admin_form($form, &$form_state) {
-  $form['api_default_core_compatibility'] = array(
+  $config = config('api.settings');
+  $form['default_core_compatibility'] = array(
     '#type' => 'textfield',
-    '#default_value' => variable_get('api_default_core_compatibility', ''),
+    '#default_value' => $config->get('default_core_compatibility'),
     '#title' => t('Default core compatibility'),
     '#required' => TRUE,
     '#description' => t('The core compatibility of the default branch/version to display if none is given in a URL. This may be overridden by the API module if a corresponding branch does not exist.'),
   );
 
-  $form['api_default_project'] = array(
+  $form['default_project'] = array(
     '#type' => 'textfield',
-    '#default_value' => variable_get('api_default_project', ''),
+    '#default_value' => $config->get('default_project'),
     '#title' => t('Default project'),
     '#autocomplete_path' => 'api/project/autocomplete',
     '#description' => t('Name of the default project to display if none is given in a URL. This may be overridden by the API module if a corresponding branch does not exist.'),
   );
 
-  $form['api_opensearch_name'] = array(
+  $form['opensearch_name'] = array(
     '#type' => 'textfield',
-    '#default_value' => variable_get('api_opensearch_name', t('Drupal API')),
+    '#default_value' => $config->get('opensearch_name'),
     '#title' => t('Name of site for OpenSearch'),
   );
 
-  $form['api_opensearch_description'] = array(
+  $form['opensearch_description'] = array(
     '#type' => 'textfield',
-    '#default_value' => variable_get('api_opensearch_description', t('Drupal API documentation')),
+    '#default_value' => $config->get('opensearch_description'),
     '#title' => t('Description of site for OpenSearch'),
   );
 
-  $form = system_settings_form($form);
-  $form['#submit'][] = 'api_reset_branches';
+  $form['actions']['#type'] = 'actions';
+  $form['actions']['submit'] = array(
+    '#type' => 'submit',
+    '#value' => t('Save configuration'),
+    '#submit' => array(
+      'api_page_admin_form_submit',
+      'api_reset_branches',
+    ),
+  );
 
   return $form;
+}
+
+/**
+ * Submit handler for api_page_admin_form().
+ */
+function api_page_admin_form_submit($form, &$form_state) {
+  $config = config('api.settings');
+  $config->set('default_branch', $form_state['values']['default_branch']);
+  $config->set('default_project', $form_state['values']['default_project']);
+  $config->set('default_core_compatibility', $form_state['values']['default_core_compatibility']);
+  $config->set('opensearch_name', $form_state['values']['opensearch_name']);
+  $config->set('opensearch_description', $form_state['values']['opensearch_description']);
+  $config->save();
 }
 
 /**
@@ -167,19 +189,9 @@ function api_page_admin_form($form, &$form_state) {
  *   Render array for the page.
  */
 function api_php_branch_list() {
-  variable_set('api_do_cron', 1);
+  state_set('api_do_cron', 1);
 
   $output = array();
-
-  $output['add_new'] = array(
-    '#type' => 'markup',
-    '#markup' => '<p>' . l(t('Add new PHP reference branch'), 'admin/config/development/api/php_branches/new') . '</p>',
-  );
-
-  $output['add_new_api'] = array(
-    '#type' => 'markup',
-    '#markup' => '<p>' . l(t('Add new API reference branch'), 'admin/config/development/api/php_branches/new_api') . '</p>',
-  );
 
   // Build a list of PHP branches.
   $branches = api_get_php_branches();
@@ -227,14 +239,9 @@ function api_php_branch_list() {
  * Generates the projects admin page.
  */
 function api_admin_project_list() {
-  variable_set('api_do_cron', 1);
+  state_set('api_do_cron', 1);
 
   $out = array();
-
-  $out['add_new'] = array(
-    '#type' => 'markup',
-    '#markup' => l(t('Add new project'), 'admin/config/development/api/projects/new'),
-  );
 
   $out['project_list'] = array(
     '#type' => 'markup',
@@ -248,14 +255,9 @@ function api_admin_project_list() {
  * Generates the branch admin page.
  */
 function api_admin_branch_list() {
-  variable_set('api_do_cron', 1);
+  state_set('api_do_cron', 1);
 
   $out = array();
-
-  $out['add_new'] = array(
-    '#type' => 'markup',
-    '#markup' => l(t('Add new branch'), 'admin/config/development/api/branches/new'),
-  );
 
   $out['branch_list'] = array(
     '#type' => 'markup',
@@ -304,8 +306,8 @@ function api_reset_queue_form_submit($form, &$form_state) {
 function api_branch_edit_form($form, $form_state, $branch_id = NULL) {
   if (is_numeric($branch_id)) {
     $branch = api_get_branch_by_id($branch_id);
-    if (!isset($branch->exclude_drupalism_regexp)) {
-      $branch->exclude_drupalism_regexp = '';
+    if (!isset($branch->exclude_backdropism_regexp)) {
+      $branch->exclude_backdropism_regexp = '';
     }
   }
   else {
@@ -320,7 +322,7 @@ function api_branch_edit_form($form, $form_state, $branch_id = NULL) {
     $branch->excluded_directories = '';
     $branch->exclude_files_regexp = '';
     $branch->update_frequency = 1;
-    $branch->exclude_drupalism_regexp = '';
+    $branch->exclude_backdropism_regexp = '';
   }
 
   $form = array(
@@ -399,12 +401,12 @@ function api_branch_edit_form($form, $form_state, $branch_id = NULL) {
     '#element_validate' => array('api_check_regexps'),
   );
 
-  $form['data']['exclude_drupalism_regexp'] = array(
-    '#title' => t('Exclude files from Drupal-specific parsing by regular expressions'),
+  $form['data']['exclude_backdropism_regexp'] = array(
+    '#title' => t('Exclude files from Backdrop-specific parsing by regular expressions'),
     '#type' => 'textarea',
-    '#default_value' => $branch->exclude_drupalism_regexp,
+    '#default_value' => $branch->exclude_backdropism_regexp,
     '#rows' => 3,
-    '#description' => t('Regular expressions: all matching files will be excluded from Drupal-specific parsing, one per line. Include delimeters. Note that if you change this setting, you will need to re-parse affected files.'),
+    '#description' => t('Regular expressions: all matching files will be excluded from Backdrop-specific parsing, one per line. Include delimeters. Note that if you change this setting, you will need to re-parse affected files.'),
     '#element_validate' => array('api_check_regexps'),
   );
 
@@ -413,7 +415,7 @@ function api_branch_edit_form($form, $form_state, $branch_id = NULL) {
     '#title' => t('Branch update frequency'),
     '#description' => t('During cron runs, this branch will be checked for updated files. This sets a minimum time to wait before checking.'),
     '#default_value' => isset($branch->update_frequency) ? $branch->update_frequency : 1,
-    '#options' => drupal_map_assoc(array(1, 3600, 10800, 21600, 43200, 86400, 604800), 'format_interval'),
+    '#options' => backdrop_map_assoc(array(1, 3600, 10800, 21600, 43200, 86400, 604800), 'format_interval'),
   );
 
   $form['submit'] = array(
@@ -537,7 +539,7 @@ function api_branch_edit_form_submit($form, &$form_state) {
 
   api_save_branch($branch);
 
-  drupal_set_message(t('Saved %branch_name.', array('%branch_name' => $branch->branch_name)));
+  backdrop_set_message(t('Saved %branch_name.', array('%branch_name' => $branch->branch_name)));
   $form_state['redirect'] = 'admin/config/development/api/branches';
 }
 
@@ -607,7 +609,7 @@ function api_php_branch_edit_form($form, $form_state, $branch_id = NULL) {
     '#title' => t('Branch update frequency'),
     '#description' => t('During cron runs, this branch will be checked for updates in the function list. This sets a minimum time to wait before checking.'),
     '#default_value' => isset($branch->update_frequency) ? $branch->update_frequency : 1,
-    '#options' => drupal_map_assoc(array(1, 3600, 10800, 21600, 43200, 86400, 604800), 'format_interval'),
+    '#options' => backdrop_map_assoc(array(1, 3600, 10800, 21600, 43200, 86400, 604800), 'format_interval'),
   );
 
   $form['submit'] = array(
@@ -639,7 +641,7 @@ function api_php_branch_edit_form_submit($form, &$form_state) {
 
   api_save_php_branch($branch);
 
-  drupal_set_message(t('Saved %branch_name.', array('%branch_name' => $branch->title)));
+  backdrop_set_message(t('Saved %branch_name.', array('%branch_name' => $branch->title)));
   $form_state['redirect'] = 'admin/config/development/api/php_branches';
 }
 
@@ -664,7 +666,7 @@ function api_api_branch_edit_form($form, $form_state, $branch_id = NULL) {
     $branch->title = '';
     $branch->reference_type = 'api';
     $branch->url = '';
-    $branch->core_compatibility = '7.x';
+    $branch->core_compatibility = '1.x';
     $branch->project_type = 'core';
     $branch->update_frequency = 1;
     $branch->search_url = '';
@@ -728,7 +730,7 @@ function api_api_branch_edit_form($form, $form_state, $branch_id = NULL) {
     '#title' => t('Branch update frequency'),
     '#description' => t('During cron runs, this branch will be checked for updates in the information. This sets a minimum time to wait before checking.'),
     '#default_value' => isset($branch->update_frequency) ? $branch->update_frequency : 1,
-    '#options' => drupal_map_assoc(array(1, 3600, 10800, 21600, 43200, 86400, 604800), 'format_interval'),
+    '#options' => backdrop_map_assoc(array(1, 3600, 10800, 21600, 43200, 86400, 604800), 'format_interval'),
   );
 
   $form['data']['page_limit'] = array(
@@ -844,7 +846,7 @@ function api_project_edit_form_submit($form, &$form_state) {
 
   api_save_project($project, $old_name);
 
-  drupal_set_message(t('Saved %project_name.', array('%project_name' => $project->project_name)));
+  backdrop_set_message(t('Saved %project_name.', array('%project_name' => $project->project_name)));
   $form_state['redirect'] = 'admin/config/development/api/projects';
 }
 
@@ -859,8 +861,8 @@ function api_project_edit_form_submit($form, &$form_state) {
 function api_branch_delete_form($form, $form_state, $branch_id) {
   $branch = api_get_branch_by_id($branch_id);
   if (!isset($branch->branch_name)) {
-    drupal_set_message(t('Invalid branch supplied'));
-    drupal_goto('admin/config/development/api/branches');
+    backdrop_set_message(t('Invalid branch supplied'));
+    backdrop_goto('admin/config/development/api/branches');
   }
 
   return confirm_form(array('#branch' => $branch), t('Are you sure you want to delete branch %branch_name and all its documentation? This operation cannot be undone.', array('%branch_name' => $branch->branch_name)), 'admin/config/development/api/branches', NULL, t('Delete'));
@@ -887,8 +889,8 @@ function api_php_branch_delete_form($form, $form_state, $branch_id) {
   $branch = isset($branches[$branch_id]) ? $branches[$branch_id] : NULL;
 
   if (!isset($branch->title)) {
-    drupal_set_message(t('Invalid branch supplied'));
-    drupal_goto('admin/config/development/api/php_branches');
+    backdrop_set_message(t('Invalid branch supplied'));
+    backdrop_goto('admin/config/development/api/php_branches');
   }
 
   return confirm_form(array('#branch' => $branch), t('Are you sure you want to delete branch %branch_name? This operation cannot be undone.', array('%branch_name' => $branch->title)), 'admin/config/development/api/php_branches', NULL, t('Delete'));
@@ -923,85 +925,6 @@ function api_project_delete_form_submit($form, &$form_state) {
 }
 
 /**
- * Form constructor for the settings form for API comments.
- *
- * @see api_comments_settings_form_submit()
- */
-function api_comments_settings_form($form, &$form_state) {
-  $type = node_type_set_defaults(array('type' => 'api', 'module' => 'api'));
-  $form['#node_type'] = $type;
-
-  // Let the Comment module add comment settings to the form.
-  if (module_exists('comment')) {
-    $form['type'] = 1;
-    comment_form_node_type_form_alter($form, $form_state);
-    unset($form['type']);
-  }
-
-  // Comment module puts the settings in a fieldset, but we don't need that.
-  unset($form['comment']['#type']);
-
-  // Add a submit button.
-  $form['submit'] = array(
-    '#type' => 'submit',
-    '#value' => t('Save comment settings'),
-  );
-
-  // Add a link to apply the current settings to new nodes.
-  if (module_exists('comment')) {
-    $form['apply_link'] = array(
-      '#type' => 'markup',
-      '#markup' => '<p>' . l(t('Apply current default comment settings to existing API pages'), 'admin/config/development/api/comments/apply') . '</p>',
-    );
-  }
-
-  return $form;
-}
-
-/**
- * Form submission handler for api_comments_settings_form().
- */
-function api_comments_settings_form_submit($form, &$form_state) {
-  foreach ($form_state['values'] as $key => $value) {
-    if (strpos($key, 'comment') === 0) {
-      variable_set($key . '_api', $value);
-    }
-  }
-  drupal_set_message(t('Saved API comment settings.'));
-}
-
-/**
- * Applies current default comment settings to existing API nodes.
- */
-function api_apply_comment_settings() {
-  if (module_exists('comment')) {
-    $setting = variable_get('comment_api', 2);
-    db_update('node')
-      ->condition('type', 'api')
-      ->fields(array('comment' => $setting))
-      ->execute();
-    // This is a query using a WHERE EXISTS, and there is no apparent way
-    // to write it using the database API, so use ANSI syntax.
-    db_query("UPDATE {node_revision} SET comment = :comment_setting WHERE EXISTS ( SELECT * FROM {node} n WHERE n.type = 'api')", array(':comment_setting' => $setting));
-    // Clear the cache so node_load doesn't load old versions.
-    entity_get_controller('node')->resetCache();
-
-    // Might as well also make sure that the body field exists for comments.
-    if ($setting != 0) {
-      $info = (object) array('type' => 'api');
-      _comment_body_field_create($info);
-    }
-
-    drupal_set_message(t('Applied default comment settings to existing API pages'));
-  }
-  else {
-    drupal_set_message(t('The Comment module is not enabled. No settings changed'));
-  }
-
-  drupal_goto('admin/config/development/api/comments');
-}
-
-/**
  * Page callback: Marks a branch for reparsing and redirects to branches page.
  *
  * @param $branch_id
@@ -1012,8 +935,8 @@ function api_apply_comment_settings() {
 function api_admin_reparse($branch_id) {
   $branch = api_get_branch_by_id($branch_id);
   if (is_null($branch)) {
-    drupal_set_message(t('Unknown branch requested for reparse'), array(), 'error');
-    drupal_goto('admin/config/development/api/branches');
+    backdrop_set_message(t('Unknown branch requested for reparse'), array(), 'error');
+    backdrop_goto('admin/config/development/api/branches');
     return;
   }
 
@@ -1022,10 +945,10 @@ function api_admin_reparse($branch_id) {
   $type = ($num > 0) ? 'status' : 'error';
   // Mark branch for update.
   $branch->last_updated = 0;
-  drupal_write_record('api_branch', $branch, array('branch_id'));
+  backdrop_write_record('api_branch', $branch, array('branch_id'));
 
-  drupal_set_message(t('@num files in branch @branch set to reparse, starting at next cron run', array('@num' => $num, '@branch' => $branch->branch_name)), $type);
-  drupal_goto('admin/config/development/api/branches');
+  backdrop_set_message(t('@num files in branch @branch set to reparse, starting at next cron run', array('@num' => $num, '@branch' => $branch->branch_name)), $type);
+  backdrop_goto('admin/config/development/api/branches');
 }
 
 /**
@@ -1049,24 +972,24 @@ function api_admin_update($type, $branch_id) {
   }
 
   if (is_null($branch)) {
-    drupal_set_message(t('Unknown branch requested for update'), array(), 'error');
+    backdrop_set_message(t('Unknown branch requested for update'), array(), 'error');
   }
   else {
     $branch->last_updated = 0;
     if ($type == 'branch') {
-      drupal_write_record('api_branch', $branch, 'branch_id');
+      backdrop_write_record('api_branch', $branch, 'branch_id');
     }
     else {
-      drupal_write_record('api_php_branch', $branch, 'branch_id');
+      backdrop_write_record('api_php_branch', $branch, 'branch_id');
     }
 
-    drupal_set_message(t('Branch @branch set to update at next cron run', array('@branch' => $branch->title)));
+    backdrop_set_message(t('Branch @branch set to update at next cron run', array('@branch' => $branch->title)));
   }
 
   if ($type == 'branch') {
-    drupal_goto('admin/config/development/api/branches');
+    backdrop_goto('admin/config/development/api/branches');
   }
   else {
-    drupal_goto('admin/config/development/api/php_branches');
+    backdrop_goto('admin/config/development/api/php_branches');
   }
 }

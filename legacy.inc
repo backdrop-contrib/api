@@ -25,8 +25,8 @@ function api_file_redirect() {
   $suffix = '';
   $file = new stdClass();
   $file->object_type = 'file';
-  $file->branch_id = variable_get('api_default_branch', NULL);
-  $default_project = $branches[variable_get('api_default_branch', NULL)]->project;
+  $file->branch_id = config_get('api.settings', 'default_branch');
+  $default_project = $branches[config_get('api.settings', 'default_branch')]->project;
 
   $end = count($args) - 1;
   if (in_array($args[$end], array('source', 'documentation'))) {
@@ -42,12 +42,12 @@ function api_file_redirect() {
   }
   $file->object_name = implode('/', array_slice($args, 0, $end + 1));
 
-  drupal_goto(api_url($file) . $suffix);
+  backdrop_goto(api_url($file) . $suffix);
 }
 
 /**
  * Redirects old search URL.
  */
 function api_legacy_search_redirect($branch, $search_term) {
-  drupal_goto('api/' . $branch->project . '/' . $branch->branch_name . '/search/' . $search_term);
+  backdrop_goto('api/' . $branch->project . '/' . $branch->branch_name . '/search/' . $search_term);
 }

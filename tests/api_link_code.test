@@ -131,9 +131,9 @@ class ApiLinkCodeTest extends ApiTestCase {
         'expected' => '<span class="php-function-or-constant">module_invoke</span>(<span class="php-variable">$module</span>, <span class="php-function-or-constant">\'<a href="' . url('api/test/sample.php/function/hook_sample_name/6') . '" title="Respond to sample updates." class="local">sample_name</a>\'</span>',
       ),
       array(
-        'message' => 'String that is alter hook linking to function in drupal_alter()',
-        'data' => '<span class="php-function-or-constant">drupal_alter</span>(<span class="php-string potential-alter">\'another_sample\'</span>',
-        'expected' => '<span class="php-function-or-constant">drupal_alter</span>(<span class="php-function-or-constant">\'<a href="' . url('api/test/sample.php/function/hook_another_sample_alter/6') . '" title="Alter samples." class="local">another_sample</a>\'</span>',
+        'message' => 'String that is alter hook linking to function in backdrop_alter()',
+        'data' => '<span class="php-function-or-constant">backdrop_alter</span>(<span class="php-string potential-alter">\'another_sample\'</span>',
+        'expected' => '<span class="php-function-or-constant">backdrop_alter</span>(<span class="php-function-or-constant">\'<a href="' . url('api/test/sample.php/function/hook_another_sample_alter/6') . '" title="Alter samples." class="local">another_sample</a>\'</span>',
       ),
       // Should not be linked
       array(
@@ -177,9 +177,9 @@ class ApiLinkCodeTest extends ApiTestCase {
         'expected' => '<span class="php-function-or-constant">module_invoke</span>(<span class="php-variable">$module</span>, <span class="php-string">\'not_a_hook_name\'</span>',
       ),
       array(
-        'message' => 'String that is nonexistent alter hook in drupal_alter()',
-        'data' => '<span class="php-function-or-constant">drupal_alter</span>(<span class="php-string potential-alter">\'not_a_hook_name\'</span>',
-        'expected' => '<span class="php-function-or-constant">drupal_alter</span>(<span class="php-string">\'not_a_hook_name\'</span>',
+        'message' => 'String that is nonexistent alter hook in backdrop_alter()',
+        'data' => '<span class="php-function-or-constant">backdrop_alter</span>(<span class="php-string potential-alter">\'not_a_hook_name\'</span>',
+        'expected' => '<span class="php-function-or-constant">backdrop_alter</span>(<span class="php-string">\'not_a_hook_name\'</span>',
       ),
     );
 

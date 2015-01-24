@@ -78,9 +78,9 @@ class ApiQueuesTestCase extends ApiTestCase {
     $this->assertEqual($this->countParseQueue(), 11, 'Parse queue is full again (' . $this->countParseQueue() . ') after updating branches.');
 
     // Reset and verify that it is empty.
-    $this->drupalGet('admin/config/development/api');
+    $this->backdropGet('admin/config/development/api');
     $this->clickLink(t('reset'));
-    $this->drupalPost(NULL, array(), t('Confirm'));
+    $this->backdropPost(NULL, array(), t('Confirm'));
     $this->assertEqual($this->countParseQueue(), 0, 'Parse queue is empty (' . $this->countParseQueue() . ') after reset.');
 
     // Update again and verify it gets full again.
@@ -126,7 +126,7 @@ class ApiQueuesTestCase extends ApiTestCase {
 
     // Test the update functionality.
     // First mark the branch so that it doesn't update each cron run.
-    $this->drupalPost('admin/config/development/api/branches/' . $branch->branch_id,
+    $this->backdropPost('admin/config/development/api/branches/' . $branch->branch_id,
       array('update_frequency' => 604800),
       t('Save branch'));
     // Run the update once, because after saving a branch it might update once.
@@ -141,7 +141,7 @@ class ApiQueuesTestCase extends ApiTestCase {
     // Click the update link on the branches page, update, and verify it does
     // get updated this time.
     sleep(5);
-    $this->drupalGet('admin/config/development/api/branches');
+    $this->backdropGet('admin/config/development/api/branches');
     $this->clickLink('update');
     $this->assertText('Branch ' . $branch->title . ' set to update at next cron run', 'Update message appears');
     $this->updateBranches();

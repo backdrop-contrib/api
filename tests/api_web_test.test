@@ -23,7 +23,7 @@ class ApiListingPagesTestCase extends ApiWebPagesBaseTest {
    */
   function testListingPages() {
     // Test the Functions page.
-    $this->drupalGet('api/' . $this->branch_info['project'] . '/functions');
+    $this->backdropGet('api/' . $this->branch_info['project'] . '/functions');
     $this->assertLink('duplicate_function', 0, 'duplicate_function is on functions list page');
     $this->assertLink('sample_class_function', 0, 'sample_class_function is on functions list page');
     $this->assertText('For testing duplicate', 'duplicate_function description is on functions list page');
@@ -42,13 +42,13 @@ class ApiListingPagesTestCase extends ApiWebPagesBaseTest {
     $this->assertLinkURLSubstring('sample.php', $this->branch_info['project'] . '/sample.php', 'sample.php link exists', 'sample.php link went to the right place');
     $this->clickLink('sample_insubdir_function');
     $this->assertText('Used for sample and testing URLs', 'Subdir link went to right place');
-    $this->drupalGet('api/' . $this->branch_info['project'] . '/functions');
+    $this->backdropGet('api/' . $this->branch_info['project'] . '/functions');
     $this->clickLink('sample-subdir.php');
     $this->assertText('A sample global in a subdirectory', 'Sample file link went to right place');
     $this->assertText('A sample file in a subdirectory', 'Sample file link went to right place');
 
     // Test the Constants page.
-    $this->drupalGet('api/' . $this->branch_info['project'] . '/constants');
+    $this->backdropGet('api/' . $this->branch_info['project'] . '/constants');
     $this->assertLink('DUPLICATE_CONSTANT', 0, 'DUPLICATE_CONSTANT is on constants list page');
     $this->assertText('For testing duplicate constant linking', 'DUPLICATE_CONSTANT description is on constants list page');
     $this->assertText('A sample constant', 'SAMPLE_CONSTANT description is on constants list page');
@@ -63,13 +63,13 @@ class ApiListingPagesTestCase extends ApiWebPagesBaseTest {
     $this->assertLinkURLSubstring('sample.php', $this->branch_info['project'] . '/sample.php', 'sample.php link exists', 'sample.php link went to the right place');
     $this->clickLink('SAMPLE_CONSTANT_IN_SUB_DIR');
     $this->assertText('A sample constant', 'Constant link went to right place');
-    $this->drupalGet('api/' . $this->branch_info['project'] . '/constants');
+    $this->backdropGet('api/' . $this->branch_info['project'] . '/constants');
     $this->clickLink('sample-subdir.php');
     $this->assertText('A sample global in a subdirectory', 'Sample file link went to right place');
     $this->assertText('A sample file in a subdirectory', 'Sample file link went to right place');
 
     // Test the Classes page.
-    $this->drupalGet('api/' . $this->branch_info['project'] . '/classes');
+    $this->backdropGet('api/' . $this->branch_info['project'] . '/classes');
     $this->assertLink('Sample2', 0, 'Sample2 is on classes list page');
     $this->assertLink('SubSample', 0, 'SubSample is on classes list page');
     $this->assertLink('SampleInterfaceTwo', 0, 'SampleInterfaceTwo is on classes list page');
@@ -88,13 +88,13 @@ class ApiListingPagesTestCase extends ApiWebPagesBaseTest {
     $this->clickLink('Sample2InSubDir');
     $this->assertText('Implements foo2.', 'Sample2 link went to right place');
     $this->assertText('Sample2InSubDir implements', 'Sample2 link went to right place');
-    $this->drupalGet('api/' . $this->branch_info['project'] . '/classes');
+    $this->backdropGet('api/' . $this->branch_info['project'] . '/classes');
     $this->clickLink('classes-subdir.php');
     $this->assertText('Classes in a subdirectory test', 'Classes file link went to right place');
     $this->assertText('Another Sample interface in a subdirectory', 'Classes file link went to right place');
 
     // Test the Files page.
-    $this->drupalGet('api/' . $this->branch_info['project'] . '/files');
+    $this->backdropGet('api/' . $this->branch_info['project'] . '/files');
     $this->assertLink('sample.php', 0, 'sample.php file name is on files list page');
     $this->assertLink('duplicates.php', 0, 'duplicates.php file name is on files list page');
     $this->assertLink('subdirectory/classes-subdir.php', 0, 'sub-directory file name is on files list page');
@@ -118,7 +118,7 @@ class ApiListingPagesTestCase extends ApiWebPagesBaseTest {
     $this->assertText('Another Sample interface in a subdirectory', 'Classes file link went to right place');
 
     // Test the Globals page.
-    $this->drupalGet('api/' . $this->branch_info['project'] . '/globals');
+    $this->backdropGet('api/' . $this->branch_info['project'] . '/globals');
     $this->assertLink('$sample_in_sub_dir_global', 0, '$sample_in_sub_dir_global is on the globals list page');
     $this->assertText('A sample global.', '$sample_global description is on the globals list page');
     $this->assertLink('sample-subdir.php', 0, 'sample-subdir.php file name is on globals list page');
@@ -130,13 +130,13 @@ class ApiListingPagesTestCase extends ApiWebPagesBaseTest {
     $this->assertLinkURLSubstring('sample.php', $this->branch_info['project'] . '/sample.php', 'sample.php link exists', 'sample.php link went to the right place');
     $this->clickLink('$sample_in_sub_dir_global');
     $this->assertText('A sample global in a subdirectory', 'Global link went to the right place');
-    $this->drupalGet('api/' . $this->branch_info['project'] . '/globals');
+    $this->backdropGet('api/' . $this->branch_info['project'] . '/globals');
     $this->clickLink('sample-subdir.php');
     $this->assertText('A sample global in a subdirectory', 'Sample file link went to right place');
     $this->assertText('A sample file in a subdirectory', 'Sample file link went to right place');
 
     // Test the Topics page.
-    $this->drupalGet('api/' . $this->branch_info['project'] . '/groups');
+    $this->backdropGet('api/' . $this->branch_info['project'] . '/groups');
     $this->assertLink('Class Samples', 0, 'Class Samples topic is on the topics page');
     $this->assertText('A sample group of classes. Should not include members', 'Class Samples description is on the topics page');
     $this->assertText('A sample group', 'Samples description is on the topics page');
@@ -146,7 +146,7 @@ class ApiListingPagesTestCase extends ApiWebPagesBaseTest {
     $this->assertLinkURLSubstring('Samples', $this->branch_info['project'] . '/sample.php/group/samp_GRP-6.x', 'Samples link exists', 'Samples link went to the right place');
 
     // Test the Deprecated page.
-    $this->drupalGet('api/' . $this->branch_info['project'] . '/deprecated');
+    $this->backdropGet('api/' . $this->branch_info['project'] . '/deprecated');
     $this->assertLink('$sample_global', 0, 'Global is on deprecated page');
     $this->assertLink('sample-three.tpl.php', 0, 'File is on deprecated page');
     $this->assertLink('Sample::$property', 0, 'Property is on deprecated page');
@@ -204,7 +204,7 @@ class ApiSimpleItemPagesTestCase extends ApiWebPagesBaseTest {
    */
   function _testConstantPage() {
     // Visit a constant page.
-    $this->drupalGet('api/' . $this->branch_info['project'] . '/sample.php/constant/DUPLICATE_CONSTANT');
+    $this->backdropGet('api/' . $this->branch_info['project'] . '/sample.php/constant/DUPLICATE_CONSTANT');
 
     // Check the text on the page.
     $this->assertTitleContains('DUPLICATE_CONSTANT', 'Constant page title includes constant name');
@@ -218,7 +218,7 @@ class ApiSimpleItemPagesTestCase extends ApiWebPagesBaseTest {
     $this->assertLinkURLSubstring('sample.php', $this->branch_info['project'] . '/sample.php', 'sample.php link exists', 'sample.php link went to the right place');
 
     // Visit a constant in a subdirectory and verify.
-    $this->drupalGet('api/' . $this->branch_info['project'] . '/subdirectory!sample-subdir.php/constant/SAMPLE_CONSTANT_IN_SUB_DIR');
+    $this->backdropGet('api/' . $this->branch_info['project'] . '/subdirectory!sample-subdir.php/constant/SAMPLE_CONSTANT_IN_SUB_DIR');
     $this->assertText('A sample constant', 'Constant description appears on subdirectory constant page');
     $this->assertText('SAMPLE_CONSTANT_IN_SUB_DIR', 'Constant name appears on subdirectory constant page');
     $this->assertText('subdirectory/', 'Subdirectory name appears on subdirectory constant page');
@@ -228,7 +228,7 @@ class ApiSimpleItemPagesTestCase extends ApiWebPagesBaseTest {
     $this->assertText('A sample file in a subdirectory', 'Sample file link went to right place');
 
     // Visit a deprecated constant.
-    $this->drupalGet('api/' . $this->branch_info['project'] . '/sample.php/constant/SAMPLE_CONSTANT');
+    $this->backdropGet('api/' . $this->branch_info['project'] . '/sample.php/constant/SAMPLE_CONSTANT');
     $this->assertText(t('Deprecated'), 'Deprecated appears on the page');
     $this->assertText('This constant is deprecated for sample purposes.', 'Text with deprecated appears on the page');
     $this->assertText('interesting, to test in-code', 'Using function description is there');
@@ -242,7 +242,7 @@ class ApiSimpleItemPagesTestCase extends ApiWebPagesBaseTest {
    */
   function _testFunctionPage() {
     // Visit a function page.
-    $this->drupalGet('api/' . $this->branch_info['project'] . '/sample.php/function/duplicate_function');
+    $this->backdropGet('api/' . $this->branch_info['project'] . '/sample.php/function/duplicate_function');
 
     // Check the text on the page.
     $this->assertTitleContains('duplicate_function', 'Function page title includes function name');
@@ -266,13 +266,13 @@ class ApiSimpleItemPagesTestCase extends ApiWebPagesBaseTest {
     $this->assertLinkURLSubstring('sample.php', $this->branch_info['project'] . '/sample.php', 'sample.php link exists', 'sample.php link went to the right place');
 
     // Verify the calling functions links.
-    $this->drupalGet('api/' . $this->branch_info['project'] . '/sample.php/function/duplicate_function');
+    $this->backdropGet('api/' . $this->branch_info['project'] . '/sample.php/function/duplicate_function');
     $this->assertRaw('1 call to duplicate_function()', 'Calling functions text is present');
     $this->assertLink('sample_in_code_links', 0, 'Calling function link is present');
     $this->assertText('Does something interesting, to test', 'Calling function description is present');
 
     // Verify the calling functions links for the lots of calls case.
-    $this->drupalGet('api/' . $this->branch_info['project'] . '/sample.php/function/sample_function');
+    $this->backdropGet('api/' . $this->branch_info['project'] . '/sample.php/function/sample_function');
     $this->assertRaw('10 calls to sample_function()', 'Calling functions text is present');
     $this->assertLink('another_sample', 0, 'Calling function link is there');
     $this->assertLink('duplicate_function', 0, 'Calling function link is there');
@@ -295,13 +295,13 @@ class ApiSimpleItemPagesTestCase extends ApiWebPagesBaseTest {
     $this->assertLink('theme_sample_two', 0, 'Calling function link is there');
 
     // Verify the referenced functions link and page.
-    $this->drupalGet('api/' . $this->branch_info['project'] . '/sample.php/function/sample_function');
+    $this->backdropGet('api/' . $this->branch_info['project'] . '/sample.php/function/sample_function');
     $this->assertRaw('1 string reference to', 'String references text is present');
     $this->assertLink('sample_in_code_links', 0, 'Link to referencing function is present');
     $this->assertText('Does something interesting', 'Description of referencing function is present');
 
     // Test the function implementations link and page.
-    $this->drupalGet('api/' . $this->branch_info['project'] . '/sample.php/function/hook_sample_name');
+    $this->backdropGet('api/' . $this->branch_info['project'] . '/sample.php/function/hook_sample_name');
     $this->assertRaw('1 function implements hook_sample_name()', 'Text for implemented hooks page is present');
     $this->assertLink('foo_sample_name', 0, 'Link to implementing function page is present');
     $this->assertText('Implements hook_sample_name().', 'Implementing function description is present');
@@ -311,7 +311,7 @@ class ApiSimpleItemPagesTestCase extends ApiWebPagesBaseTest {
     $this->assertNoLink('sample_constant', 'Wrong-case constant did not turn into a link');
 
     // Test the hook invocations link and page.
-    $this->drupalGet('api/' . $this->branch_info['project'] . '/sample.php/function/sample_in_code_links');
+    $this->backdropGet('api/' . $this->branch_info['project'] . '/sample.php/function/sample_in_code_links');
     $this->clickLink('sample_name');
     $this->assertURLContains('api/' . $this->branch_info['project'] . '/sample.php/function/hook_sample_name', 'URL is correct for hook link');
     $this->assertRaw('2 invocations of hook_sample_name()', 'Text for invokes page is present');
@@ -320,13 +320,13 @@ class ApiSimpleItemPagesTestCase extends ApiWebPagesBaseTest {
     $this->assertLink('sample_name', 0, 'Link to second invoking function page is present');
 
     // Test hook invocation links for alter hook.
-    $this->drupalGet('api/' . $this->branch_info['project'] . '/sample.php/function/sample_in_code_links');
+    $this->backdropGet('api/' . $this->branch_info['project'] . '/sample.php/function/sample_in_code_links');
     $this->clickLink('another_sample');
     $this->assertURLContains('api/' . $this->branch_info['project'] . '/sample.php/function/hook_another_sample_alter', 'URL is correct for hook link');
     $this->assertRaw('2 invocations of hook_another_sample_alter()', 'Text for invokes page is present');
 
     // Test the theme invokes page.
-    $this->drupalGet('api/' . $this->branch_info['project'] . '/sample.php/function/sample_in_code_links');
+    $this->backdropGet('api/' . $this->branch_info['project'] . '/sample.php/function/sample_in_code_links');
     $this->clickLink('sample_one');
     $this->assertRaw('3 theme calls to theme_sample_one()', 'Theme calls text is present');
     $this->assertLink('sample_in_code_links', 0, 'Link to theme calling function is present');
@@ -334,7 +334,7 @@ class ApiSimpleItemPagesTestCase extends ApiWebPagesBaseTest {
     $this->assertLink('sample-two.tpl.php', 0, 'Link to theme calling template file is present');
 
     // Test the theme invokes page from a template.
-    $this->drupalGet('api/' . $this->branch_info['project'] . '/sample.php/function/sample_in_code_links');
+    $this->backdropGet('api/' . $this->branch_info['project'] . '/sample.php/function/sample_in_code_links');
     $this->clickLink('sample_two');
     $this->assertRaw('1 theme call to sample-two.tpl.php', 'Theme calls text is present');
     $this->assertRaw('2 string references to the theme hook from sample-two.tpl.php', 'Theme references text is present');
@@ -342,7 +342,7 @@ class ApiSimpleItemPagesTestCase extends ApiWebPagesBaseTest {
     $this->assertLink('sample_function', 0, 'Link to theme string reference function is present');
 
     // Also test the theme invokes page from the same-hook function.
-    $this->drupalGet('api/' . $this->branch_info['project'] . '/sample.php/function/theme_sample_two');
+    $this->backdropGet('api/' . $this->branch_info['project'] . '/sample.php/function/theme_sample_two');
     $this->assertRaw('1 theme call to theme_sample_two()', 'Theme calls text is present');
     $this->assertRaw('2 string references to the theme hook from theme_sample_two()', 'Theme references text is present');
     $this->assertLink('sample_in_code_links', 0, 'Link to theme calling function is present');
@@ -350,20 +350,20 @@ class ApiSimpleItemPagesTestCase extends ApiWebPagesBaseTest {
 
     // Try the other duplicate_function() page, and verify the calling
     // functions are there too.
-    $this->drupalGet('api/' . $this->branch_info['project'] . '/duplicates.php/function/duplicate_function');
+    $this->backdropGet('api/' . $this->branch_info['project'] . '/duplicates.php/function/duplicate_function');
     $this->assertRaw('1 call to duplicate_function()', 'Text for list of calling functions is present');
     $this->assertLink('sample_in_code_links', 0, 'Calling function link is present');
     $this->assertText('Does something interesting, to test', 'Calling function description is present');
 
     // Also check the links in duplicate_function() to the two PHP branches.
-    $this->drupalGet('api/' . $this->branch_info['project'] . '/duplicates.php/function/duplicate_function');
+    $this->backdropGet('api/' . $this->branch_info['project'] . '/duplicates.php/function/duplicate_function');
     $this->assertLinkURL('foo_function', 'http://example.com/function/foo_function', 'foo_function is linked', 'foo_function link goes to right place');
     $this->assertLinkURL('bar_function', 'http://example.com/function/bar_function', 'bar_function is linked', 'bar_function link goes to right place');
     $this->assertNoLink('not_a_function', 'not_a_function() is not linked');
     $this->assertLinkURL('substr', 'http://php.net/substr', 'substr function is linked', 'substr function link goes to the right place');
 
     // Now try the function page with more complicated documentation.
-    $this->drupalGet('api/' . $this->branch_info['project'] . '/sample.php/function/sample_function');
+    $this->backdropGet('api/' . $this->branch_info['project'] . '/sample.php/function/sample_function');
 
     // Note that the unit tests verify a lot of other stuff, such as the
     // presence of text when loading a function, so we'll just look for some of
@@ -394,7 +394,7 @@ class ApiSimpleItemPagesTestCase extends ApiWebPagesBaseTest {
     $this->assertTrue(in_array('$parameter', $strong_pars), 'parameter is highlighted on function page');
 
     // Now try the function page with class parameters -- test the links.
-    $this->drupalGet('api/' . $this->branch_info['project'] . '/sample.php/function/sample_class_function');
+    $this->backdropGet('api/' . $this->branch_info['project'] . '/sample.php/function/sample_class_function');
     $this->assertLink('SubSample', 0, 'Parameter type is linked');
     $this->assertLink('SampleInterface', 0, 'Return value type is linked');
     $this->assertLinkURLSubstring('SubSample', $this->branch_info['project'] . '/classes.php/class/SubSample', 'SubSample link exists', 'SubSample link went to the right place');
@@ -417,7 +417,7 @@ class ApiSimpleItemPagesTestCase extends ApiWebPagesBaseTest {
     $this->assertText('Object-oriented tests.', 'classes.php file description is there');
 
     // Visit a function in a subdirectory and verify.
-    $this->drupalGet('api/' . $this->branch_info['project'] . '/subdirectory!sample-subdir.php/function/sample_insubdir_function');
+    $this->backdropGet('api/' . $this->branch_info['project'] . '/subdirectory!sample-subdir.php/function/sample_insubdir_function');
     $this->assertText('Another sample function; in a sub-directory.', 'Function description appears on subdirectory function page');
     $this->assertText('sample_insubdir_function', 'Function name appears on subdirectory function page');
     $this->assertText('subdirectory/', 'Subdirectory name appears on subdirectory function page');
@@ -432,7 +432,7 @@ class ApiSimpleItemPagesTestCase extends ApiWebPagesBaseTest {
    */
   function _testGlobalPage() {
     // Visit a global page.
-    $this->drupalGet('api/' . $this->branch_info['project'] . '/sample.php/global/sample_global');
+    $this->backdropGet('api/' . $this->branch_info['project'] . '/sample.php/global/sample_global');
 
     // Check the text on the page.
     $this->assertTitleContains('$sample_global', 'Global page title includes global name');
@@ -460,7 +460,7 @@ class ApiSimpleItemPagesTestCase extends ApiWebPagesBaseTest {
     $this->assertLinkURLSubstring('Samples', $this->branch_info['project'] . '/sample.php/group/samp_GRP-6.x', 'Samples link exists', 'Samples link went to the right place');
 
     // Visit a global in a subdirectory and verify.
-    $this->drupalGet('api/' . $this->branch_info['project'] . '/subdirectory!sample-subdir.php/global/sample_in_sub_dir_global');
+    $this->backdropGet('api/' . $this->branch_info['project'] . '/subdirectory!sample-subdir.php/global/sample_in_sub_dir_global');
     $this->assertText('A sample global in a subdirectory', 'Global description appears on subdirectory global page');
     $this->assertText('$sample_in_sub_dir_global', 'Global name appears on subdirectory global page');
     $this->assertText('subdirectory/', 'Subdirectory name appears on subdirectory global page');
@@ -497,7 +497,7 @@ class ApiComplexItemPagesTestCase extends ApiWebPagesBaseTest {
    */
   function _testClassPages() {
     // Visit a class page.
-    $this->drupalGet('api/' . $this->branch_info['project'] . '/classes.php/class/Sample');
+    $this->backdropGet('api/' . $this->branch_info['project'] . '/classes.php/class/Sample');
 
     // Check the text on the page.
     $this->assertTitleContains('Sample', 'Class page title includes class name');
@@ -536,7 +536,7 @@ class ApiComplexItemPagesTestCase extends ApiWebPagesBaseTest {
     $this->assertLink('SampleInterfaceTwo', 0, 'Link to subclass interface appears on hierarchy page');
     $this->assertText('InterfaceNotDefinedHere', 'Off-site interface listed in hierarchy');
 
-    $this->drupalGet('api/' . $this->branch_info['project'] . '/classes.php/class/Sample');
+    $this->backdropGet('api/' . $this->branch_info['project'] . '/classes.php/class/Sample');
     $this->clickLink('SampleInterface');
     $this->assertURLContains($this->branch_info['project'] . '/classes.php/interface/SampleInterface', 'Interface link went to the right place');
     // While we're here, check some text...
@@ -550,7 +550,7 @@ class ApiComplexItemPagesTestCase extends ApiWebPagesBaseTest {
     $this->assertLink('Sample::foo', 0, 'First override is found');
     $this->assertLink('SampleInSubDir::foo', 0, 'Second override is found');
 
-    $this->drupalGet('api/' . $this->branch_info['project'] . '/classes.php/class/Sample');
+    $this->backdropGet('api/' . $this->branch_info['project'] . '/classes.php/class/Sample');
     $this->clickLink('Sample::$property');
     $this->assertURLContains($this->branch_info['project'] . '/classes.php/property/Sample', 'Property link went to the right place');
     // While here, check text...
@@ -567,7 +567,7 @@ class ApiComplexItemPagesTestCase extends ApiWebPagesBaseTest {
     $this->assertText(t('Deprecated'), 'Deprecated appears on the page');
     $this->assertText('This property is deprecated for sample purposes.', 'Text with deprecated appears on the page');
 
-    $this->drupalGet('api/' . $this->branch_info['project'] . '/classes.php/class/Sample');
+    $this->backdropGet('api/' . $this->branch_info['project'] . '/classes.php/class/Sample');
     $this->clickLink('Sample::baz');
     $this->assertURLContains($this->branch_info['project'] . '/classes.php/function/Sample', 'Method link went to the right place');
     // While here, check text...
@@ -584,7 +584,7 @@ class ApiComplexItemPagesTestCase extends ApiWebPagesBaseTest {
     $this->assertLink('Sample::foo', 0, 'Calling function 1 is there');
     $this->assertLink('SubSample::bar', 0, 'Calling function 2 link is there');
 
-    $this->drupalGet('api/' . $this->branch_info['project'] . '/classes.php/class/Sample');
+    $this->backdropGet('api/' . $this->branch_info['project'] . '/classes.php/class/Sample');
     $this->clickLink('Sample::constant');
     $this->assertURLContains($this->branch_info['project'] . '/classes.php/constant/Sample', 'Constant link went to the right place');
     // While here, check text...
@@ -596,7 +596,7 @@ class ApiComplexItemPagesTestCase extends ApiWebPagesBaseTest {
     $this->assertText('constant Sample::constant', 'H1 title text is there');
 
     // Visit the subclass page and verify the extends info is in the hierarchy.
-    $this->drupalGet('api/' . $this->branch_info['project'] . '/classes.php/class/SubSample');
+    $this->backdropGet('api/' . $this->branch_info['project'] . '/classes.php/class/SubSample');
     $this->assertText('extends \\ClassNotDefinedHere', 'Class hierarchy includes extend off-site');
     $this->assertLink('SampleInterface', 0, 'Class hierarchy shows implements of parent');
     // Also verify the deprecated text.
@@ -604,7 +604,7 @@ class ApiComplexItemPagesTestCase extends ApiWebPagesBaseTest {
     $this->assertText('This class is deprecated for sample purposes.', 'Text with deprecated appears on the page');
 
     // Visit a class in a subdirectory and verify.
-    $this->drupalGet('api/' . $this->branch_info['project'] . '/subdirectory!classes-subdir.php/class/SampleInSubDir');
+    $this->backdropGet('api/' . $this->branch_info['project'] . '/subdirectory!classes-subdir.php/class/SampleInSubDir');
     $this->assertText('Sample class in a subdirectory.', 'Class description appears on subdirectory class page');
     $this->assertText('SampleInSubDir', 'Class name appears on subdirectory class page');
     $this->assertText('subdirectory/', 'Subdirectory name appears on subdirectory class page');
@@ -620,7 +620,7 @@ class ApiComplexItemPagesTestCase extends ApiWebPagesBaseTest {
     $this->assertText('Another Sample interface in a subdirectory.', 'Classes file link went to right place');
 
     // Visit the two methods and verify the links.
-    $this->drupalGet('api/' . $this->branch_info['project'] . '/subdirectory!classes-subdir.php/class/SampleInSubDir');
+    $this->backdropGet('api/' . $this->branch_info['project'] . '/subdirectory!classes-subdir.php/class/SampleInSubDir');
     $this->clickLink('SampleInSubDir::baz');
     $this->assertLinkURLSubstring('foo', 'classes-subdir.php/function/SampleInSubDir', 'foo function link is present', 'foo function link goes to right place');
     $this->clickLink('foo');
@@ -632,7 +632,7 @@ class ApiComplexItemPagesTestCase extends ApiWebPagesBaseTest {
     $this->assertText('Overrides parent function.', 'Overriding function description is there');
 
     // Visit the class that is for overrides testing.
-    $this->drupalGet('api/' . $this->branch_info['project'] . '/subdirectory!classes-subdir.php/class/SubInSubDirSample');
+    $this->backdropGet('api/' . $this->branch_info['project'] . '/subdirectory!classes-subdir.php/class/SubInSubDirSample');
     // Verify override links for properties.
     $this->assertLink('SubInSubDirSample::$property_in_sub_dir', 0, 'Override property link is there');
     $this->assertText('Overrides parent property', 'Override property description is there');
@@ -642,7 +642,7 @@ class ApiComplexItemPagesTestCase extends ApiWebPagesBaseTest {
     $this->assertLink('SampleInSubDir::$property_in_sub_dir', 0, 'Overriden property link is on property page');
 
     // Verify override links for methods.
-    $this->drupalGet('api/' . $this->branch_info['project'] . '/subdirectory!classes-subdir.php/class/SubInSubDirSample');
+    $this->backdropGet('api/' . $this->branch_info['project'] . '/subdirectory!classes-subdir.php/class/SubInSubDirSample');
     $this->assertLink('SampleInSubDir::baz', 0, 'Non-overridden function link is there');
     $this->assertLink('SubInSubDirSample::bar', 0, 'Overridden function link is there');
     $this->assertText('A public method', 'Override method with inheritdoc inherits doc from parent');
@@ -653,7 +653,7 @@ class ApiComplexItemPagesTestCase extends ApiWebPagesBaseTest {
     $this->assertLink('SampleInSubDir::foo', 0, 'Link to overridden method is on method page');
 
     // Verify override links for constants.
-    $this->drupalGet('api/' . $this->branch_info['project'] . '/subdirectory!classes-subdir.php/class/SubInSubDirSample');
+    $this->backdropGet('api/' . $this->branch_info['project'] . '/subdirectory!classes-subdir.php/class/SubInSubDirSample');
     $this->assertLink('SubInSubDirSample::constant', 0, 'Override constant link is there');
     $this->assertText('Overrides parent constant', 'Override constant description is there');
     $this->assertLink('SampleInSubDir::constant', 0, 'Overridden constant link is there');
@@ -666,7 +666,7 @@ class ApiComplexItemPagesTestCase extends ApiWebPagesBaseTest {
    */
   function _testTopicPages() {
     // Test the Sample topic page.
-    $this->drupalGet('api/' . $this->branch_info['project'] . '/sample.php/group/samp_GRP-6.x');
+    $this->backdropGet('api/' . $this->branch_info['project'] . '/sample.php/group/samp_GRP-6.x');
     $this->assertText('A sample group', 'Sample topic description appears on the page');
     $this->assertTitleContains('Samples', 'Topic page title includes topic name');
     $this->assertLink('sample_function', 0, 'sample_function link is on sample topic page');
@@ -698,7 +698,7 @@ class ApiComplexItemPagesTestCase extends ApiWebPagesBaseTest {
     // Now try the Sample Classes topic and make sure only classes and not
     // members appear there.
 
-    $this->drupalGet('api/' . $this->branch_info['project'] . '/classes.php/group/class_samples');
+    $this->backdropGet('api/' . $this->branch_info['project'] . '/classes.php/group/class_samples');
     $this->assertText('A sample group of classes. Should not include members', 'Sample group topic description appears on the page');
     $this->assertTitleContains('Class Samples', 'Topic page title includes topic name');
     $this->assertText('Sample class.', 'Sample class description is on topic page');
@@ -718,7 +718,7 @@ class ApiComplexItemPagesTestCase extends ApiWebPagesBaseTest {
    * Tests that file pages have the right information.
    */
   function _testFilePages() {
-    $this->drupalGet('api/' . $this->branch_info['project'] . '/sample.php/');
+    $this->backdropGet('api/' . $this->branch_info['project'] . '/sample.php/');
     $this->assertText('A sample file', 'Sample file description appears on the page');
     $this->assertTitleContains('sample.php', 'File page title includes file name');
     $this->assertLink('sample_function', 0, 'sample_function link is on sample file page');
@@ -738,7 +738,7 @@ class ApiComplexItemPagesTestCase extends ApiWebPagesBaseTest {
     $this->assertLinkURLSubstring('$sample_global', $this->branch_info['project'] . '/sample.php/global/sample_global', 'sample_global link exists', 'sample_global link went to the right place');
 
     // Now try the classes file.
-    $this->drupalGet('api/' . $this->branch_info['project'] . '/classes.php');
+    $this->backdropGet('api/' . $this->branch_info['project'] . '/classes.php');
     $this->assertText('Object-oriented tests', 'Sample file file description appears on the page');
     $this->assertTitleContains('classes.php', 'File page title includes file name');
     $this->assertLink('Sample', 0, 'Sample class link is on file page');
@@ -755,7 +755,7 @@ class ApiComplexItemPagesTestCase extends ApiWebPagesBaseTest {
     $this->assertLinkURLSubstring('SampleInterface', $this->branch_info['project'] . '/classes.php/interface/SampleInterface', 'SampleInterface link exists', 'SampleInterface link went to the right place');
 
     // Now try a file in a subdirectory.
-    $this->drupalGet('api/' . $this->branch_info['project'] . '/subdirectory!sample-subdir.php');
+    $this->backdropGet('api/' . $this->branch_info['project'] . '/subdirectory!sample-subdir.php');
     $this->assertText('A sample file in a subdirectory.', 'File description appears on subdirectory file page');
     $this->assertText('sample-subdir.', 'File name appears on subdirectory file page');
     $this->assertLink('sample_insubdir_function', 0, 'Function link appears on subdirectory file page');
@@ -763,27 +763,27 @@ class ApiComplexItemPagesTestCase extends ApiWebPagesBaseTest {
     $this->assertText('Used for sample and testing URLs', 'Subdir link went to right place');
 
     // Now try a file with -- in the name.
-    $this->drupalGet('api/' . $this->branch_info['project'] . '/sample--doubledash.tpl.php');
+    $this->backdropGet('api/' . $this->branch_info['project'] . '/sample--doubledash.tpl.php');
     $this->assertText('Displays a sample with a doubledash.', 'File description appears on double-dash page');
 
     // Now try the HTML sample file.
-    $this->drupalGet('api/' . $this->branch_info['project'] . '/htmlfile.html/');
+    $this->backdropGet('api/' . $this->branch_info['project'] . '/htmlfile.html/');
     $this->assertTitleContains("Sample HTML file's title", 'HTML file page has right title');
     $this->assertText("Sample HTML file's body", 'HTML file body is displayed');
     $this->assertText("Sample HTML file's title", 'HTML file title is displayed');
     $this->assertText('head', 'HTML file source is displayed');
 
     // Now try the text sample file.
-    $this->drupalGet('api/' . $this->branch_info['project'] . '/subdirectory!textfile.txt/');
+    $this->backdropGet('api/' . $this->branch_info['project'] . '/subdirectory!textfile.txt/');
     $this->assertTitleContains('textfile.txt', 'Text file page has right title');
     $this->assertText('This is a sample text file for testing.', 'Text file page displays the text');
 
     // Now try the one-function file.
-    $this->drupalGet('api/' . $this->branch_info['project'] . '/onefunction.php/');
+    $this->backdropGet('api/' . $this->branch_info['project'] . '/onefunction.php/');
     $this->assertLink('only_function_in_file', 0, 'Function link is present from one-function file.');
 
     // Now the deprecated file.
-    $this->drupalGet('api/' . $this->branch_info['project'] . '/sample-three.tpl.php/');
+    $this->backdropGet('api/' . $this->branch_info['project'] . '/sample-three.tpl.php/');
     $this->assertText(t('Deprecated'), 'Deprecated appears on the page');
     $this->assertText('This file is deprecated for sample purposes.', 'Text with deprecated appears on the page');
 
@@ -809,7 +809,7 @@ class ApiAdminPagesTestCase extends ApiWebPagesBaseTest {
    */
   function testAdminPages() {
     // Verify the PHP branches overview page.
-    $this->drupalGet('admin/config/development/api/php_branches');
+    $this->backdropGet('admin/config/development/api/php_branches');
     $this->assertText('php', 'PHP branch type appears');
     $this->assertText($this->php_branch_info['title'], 'Test PHP branch title appears');
 
@@ -817,22 +817,22 @@ class ApiAdminPagesTestCase extends ApiWebPagesBaseTest {
     $this->clickLink('Add new API reference branch');
     $info = array(
       'title' => 'sample_api_branch',
-      'data[url]' => url('<front>', array('absolute' => TRUE )) . '/' . drupal_get_path('module', 'api') . '/tests/php_sample/sample_drupal_listing.json',
+      'data[url]' => url('<front>', array('absolute' => TRUE )) . '/' . backdrop_get_path('module', 'api') . '/tests/php_sample/sample_backdrop_listing.json',
       'data[search_url]' => url('<front>', array('absolute' => TRUE )) . '/api/test_api_project/test_api_branch/search/',
-      'data[core_compatibility]' => '7.x',
+      'data[core_compatibility]' => '1.x',
       'data[project_type]' => 'core',
       'update_frequency' => 1,
     );
-    $this->drupalPost(NULL, $info, t('Save branch'));
+    $this->backdropPost(NULL, $info, t('Save branch'));
     $this->assertText($info['title'], 'New branch title is there');
 
     // Delete it and verify it is gone.
     $this->clickLink('delete', 1);
-    $this->drupalPost(NULL, array(), t('Delete'));
+    $this->backdropPost(NULL, array(), t('Delete'));
     $this->assertNoText($info['title'], 'New branch title is gone');
 
     // Verify the branches overview page.
-    $this->drupalGet('admin/config/development/api/branches');
+    $this->backdropGet('admin/config/development/api/branches');
 
     $this->assertText($this->branch_info['project'], 'Test project identifier appears');
     $this->assertText($this->branch_info['title'], 'Test branch title appears');
@@ -850,7 +850,7 @@ class ApiAdminPagesTestCase extends ApiWebPagesBaseTest {
       'title' => 'Testing 6 baz',
     );
 
-    $this->drupalPost(NULL, $tmp_branch_info, t('Save branch'));
+    $this->backdropPost(NULL, $tmp_branch_info, t('Save branch'));
 
     // This should take us back to the admin listing. Verify the new info is
     // there.
@@ -862,7 +862,7 @@ class ApiAdminPagesTestCase extends ApiWebPagesBaseTest {
     $this->assertRaw($tmp_branch_info['branch_name'], 'Branch name appears on edit page');
     $this->assertRaw($tmp_branch_info['title'], 'Branch title appears on edit page');
 
-    $this->drupalPost(NULL, array('branch_name' => $this->branch_info['branch_name'], 'title' => $this->branch_info['title']), t('Save branch'));
+    $this->backdropPost(NULL, array('branch_name' => $this->branch_info['branch_name'], 'title' => $this->branch_info['title']), t('Save branch'));
 
     // Now we should be back on the listing page. Test the reparse link.
     $count = $this->howManyToParse();
@@ -873,7 +873,7 @@ class ApiAdminPagesTestCase extends ApiWebPagesBaseTest {
     $this->assertEqual($count, 11, "11 files ($count) are marked to parse after clicking reparse link");
 
     // Test the Projects listing page.
-    $this->drupalGet('admin/config/development/api/projects');
+    $this->backdropGet('admin/config/development/api/projects');
     $this->assertText($this->branch_info['project'], 'Project name appears on projects list page');
     $this->assertText($this->branch_info['project_type'], 'Project type appears on projects list page');
     $this->assertText($this->branch_info['project_title'], 'Project title appears on projects list page');
@@ -882,7 +882,7 @@ class ApiAdminPagesTestCase extends ApiWebPagesBaseTest {
     $new_project_word = 'pizza';
     $new_branch_word = 'crust';
     $this->clickLink('Add new project');
-    $this->drupalPost(NULL, array(
+    $this->backdropPost(NULL, array(
         'project_title' => $new_project_word,
         'project_name' => $new_project_word,
         'project_type' => $new_project_word,
@@ -896,19 +896,19 @@ class ApiAdminPagesTestCase extends ApiWebPagesBaseTest {
         'branch_name' => $new_branch_word,
         'title' => $new_branch_word,
       ));
-    $this->drupalGet('admin/config/development/api/branches');
+    $this->backdropGet('admin/config/development/api/branches');
     $this->assertRaw($new_branch_word, 'New branch appears on the branch page');
-    $this->drupalGet('admin/config/development/api/branches/2/delete');
-    $this->drupalPost(NULL, array(), t('Delete'));
-    $this->drupalGet('admin/config/development/api/branches');
+    $this->backdropGet('admin/config/development/api/branches/2/delete');
+    $this->backdropPost(NULL, array(), t('Delete'));
+    $this->backdropGet('admin/config/development/api/branches');
     $this->assertNoRaw($new_branch_word, 'After deleting, new branch info is not there');
 
     // Delete the project and verify the project and branch words are gone.
-    $this->drupalGet('admin/config/development/api/projects/' . $new_project_word . '/delete');
-    $this->drupalPost(NULL, array(), t('Delete'));
-    $this->drupalGet('admin/config/development/api/branches');
+    $this->backdropGet('admin/config/development/api/projects/' . $new_project_word . '/delete');
+    $this->backdropPost(NULL, array(), t('Delete'));
+    $this->backdropGet('admin/config/development/api/branches');
     $this->assertNoRaw($new_project_word, 'After deleting, new project info is not there');
-    $this->drupalGet('admin/config/development/api/projects');
+    $this->backdropGet('admin/config/development/api/projects');
     $this->assertNoRaw($new_project_word, 'After deleting, new project info is not there');
   }
 }
@@ -944,8 +944,8 @@ class ApiEmptyPageLinksTestCase extends ApiWebPagesBaseTest {
       'project' => 'test2',
       'project_title' => 'Project 2',
       'title' => 'Project 2 6.x',
-      'directory' => drupal_get_path('module', 'api') . '/tests/sample2',
-      'excluded' => drupal_get_path('module', 'api') . '/tests/sample2/maybe_exclude',
+      'directory' => backdrop_get_path('module', 'api') . '/tests/sample2',
+      'excluded' => backdrop_get_path('module', 'api') . '/tests/sample2/maybe_exclude',
     ));
 
     // Remove built-in PHP branch.
@@ -962,7 +962,7 @@ class ApiEmptyPageLinksTestCase extends ApiWebPagesBaseTest {
    */
   function testEmptyPageLinks() {
     // Visit the branch home page for the first project.
-    $this->drupalGet('api/' . $this->branch_info['project']);
+    $this->backdropGet('api/' . $this->branch_info['project']);
     // Verify that all the listing page links are there.
     $this->assertLink(t('Files'), 0, 'Files link is present');
     $this->assertLink(t('Functions'), 0, 'Functions link is present');
@@ -981,7 +981,7 @@ class ApiEmptyPageLinksTestCase extends ApiWebPagesBaseTest {
     $this->assertLink($this->branch_info_2['project_title'], 0, 'Second project link is present');
 
     // Visit the branch home page for the second project.
-    $this->drupalGet('api/' . $this->branch_info_2['project']);
+    $this->backdropGet('api/' . $this->branch_info_2['project']);
     // Verify that the correct listing page links are there.
     $this->assertLink(t('Files'), 0, 'Files link is present');
     $this->assertLink(t('Functions'), 0, 'Functions link is present');
@@ -995,23 +995,23 @@ class ApiEmptyPageLinksTestCase extends ApiWebPagesBaseTest {
 
     // Visit the Functions listing pages and verify they link to the other
     // projects.
-    $this->drupalGet('api/' . $this->branch_info['project'] . '/functions');
+    $this->backdropGet('api/' . $this->branch_info['project'] . '/functions');
     $this->assertLink(t('Other projects'), 0, 'Link to projects page is present');
-    $this->drupalGet('api/' . $this->branch_info_2['project'] . '/functions');
+    $this->backdropGet('api/' . $this->branch_info_2['project'] . '/functions');
     $this->assertLink(t('Other projects'), 0, 'Link to projects page is present');
 
     // Turn on the API navigation block. Visit a function page in both
     // projects, and verify the right links are showing in the API
     // navigation block.
 
-    $this->drupalPost('admin/structure/block/list', array(
+    $this->backdropPost('admin/structure/block/list', array(
         'blocks[api_navigation][region]' => 'sidebar_first',
       ),
       t('Save blocks')
     );
 
     // Project/branch with all possible types of items.
-    $this->drupalGet('api/' . $this->branch_info['project'] . '/sample.php/function/sample_function');
+    $this->backdropGet('api/' . $this->branch_info['project'] . '/sample.php/function/sample_function');
     $this->assertText(t('API Navigation'), 'Block title is present');
     $this->assertLink($this->branch_info['title'], 0, 'Branch link is present');
     $this->assertLink(t('Files'), 0, 'Files link is present');
@@ -1022,7 +1022,7 @@ class ApiEmptyPageLinksTestCase extends ApiWebPagesBaseTest {
     $this->assertLink(t('Topics'), 0, 'Topics link is present');
 
     // Project/branch with only files/functions.
-    $this->drupalGet('api/' . $this->branch_info_2['project'] . '/sample2.php/function/second_sample_function');
+    $this->backdropGet('api/' . $this->branch_info_2['project'] . '/sample2.php/function/second_sample_function');
     $this->assertText(t('API Navigation'), 'Block title is present');
     $this->assertLink($this->branch_info_2['title'], 0, 'Branch link is present');
     $this->assertLink(t('Files'), 0, 'Files link is present');
@@ -1052,18 +1052,18 @@ class ApiSearchTestCase extends ApiWebPagesBaseTest {
    */
   function testSearch() {
     // Test a search that should go directly to the single result.
-    $this->drupalPost('api/' . $this->branch_info['project'] . '/' . $this->branch_info['branch_name'] . '/search', array(
+    $this->backdropPost('api/' . $this->branch_info['project'] . '/' . $this->branch_info['branch_name'] . '/search', array(
         'search' => 'sample_function',
       ),
       t('Search'));
     $this->assertURLContains('api/' . $this->branch_info['project'] . '/sample.php/function/sample_function', 'Search went directly to sample_function page');
 
     // Try it with the URL rather than visiting the search page.
-    $this->drupalGet('api/' . $this->branch_info['project'] . '/' . $this->branch_info['branch_name'] . '/search/sample_function');
+    $this->backdropGet('api/' . $this->branch_info['project'] . '/' . $this->branch_info['branch_name'] . '/search/sample_function');
     $this->assertURLContains('api/' . $this->branch_info['project'] . '/sample.php/function/sample_function', 'Search went directly to sample_function page');
 
     // Now try it with a search that should have multiple results.
-    $this->drupalPost('api/' . $this->branch_info['project'] . '/' . $this->branch_info['branch_name'] . '/search', array(
+    $this->backdropPost('api/' . $this->branch_info['project'] . '/' . $this->branch_info['branch_name'] . '/search', array(
         'search' => 'foo',
       ),
       t('Search'));
@@ -1080,13 +1080,13 @@ class ApiSearchTestCase extends ApiWebPagesBaseTest {
 }
 
 /**
- * Tests the exclude from Drupalism functionality.
+ * Tests the exclude from Backdropism functionality.
  */
-class ApiExcludeDrupalismTestCase extends ApiWebPagesBaseTest {
+class ApiExcludeBackdropismTestCase extends ApiWebPagesBaseTest {
   public static function getInfo() {
     return array(
-      'name' => 'Drupalism exclusion',
-      'description' => 'Tests that excluding files from Drupalisms works',
+      'name' => 'Backdropism exclusion',
+      'description' => 'Tests that excluding files from Backdropisms works',
       'group' => 'API module',
     );
   }
@@ -1098,10 +1098,10 @@ class ApiExcludeDrupalismTestCase extends ApiWebPagesBaseTest {
     $this->baseSetUp();
 
     // Create a "file" branch with the excluded directory but exclude it from
-    // drupalisms.
+    // backdropisms.
     $this->branch_info = $this->setUpBranchUI('', TRUE, array(
       'excluded' => '',
-      'exclude_drupalism_regexp' => '|to_exclude|',
+      'exclude_backdropism_regexp' => '|to_exclude|',
     ));
 
     $this->removePHPBranch();
@@ -1115,8 +1115,8 @@ class ApiExcludeDrupalismTestCase extends ApiWebPagesBaseTest {
   /**
    * Tests that the hook does not turn into a link in the excluded file.
    */
-  function testDrupalExclusion() {
-    $this->drupalGet('api/' . $this->branch_info['project'] . '/functions');
+  function testBackdropExclusion() {
+    $this->backdropGet('api/' . $this->branch_info['project'] . '/functions');
     $this->clickLink('excluded_function');
     $this->assertText('sample_two', 'sample_two text is there in excluded.php');
     $this->assertNoLink('sample_two', 'sample_two text is not a link in excluded.php');
@@ -1125,7 +1125,7 @@ class ApiExcludeDrupalismTestCase extends ApiWebPagesBaseTest {
     $this->clickLink('sample_function');
     $this->assertLink('excluded_function', 0, 'sample_function page has reference link to excluded_function()');
 
-    $this->drupalGet('api/' . $this->branch_info['project'] . '/sample.php/function/sample_in_code_links');
+    $this->backdropGet('api/' . $this->branch_info['project'] . '/sample.php/function/sample_in_code_links');
     $this->assertText('sample_two', 'sample_two text is there in sample.php');
     $this->assertLink('sample_two', 0, 'sample_two text is a link in sample.php');
     $this->clickLink('sample_two');

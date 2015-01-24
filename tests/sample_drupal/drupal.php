@@ -2,7 +2,7 @@
 
 /**
  * @file
- * A few core Drupal functions to test linking.
+ * A few core Backdrop functions to test linking.
  */
 
 /**
@@ -69,7 +69,7 @@ function module_implements($hook) {
  *   'node_content', and so on are several examples. Alternatively can be an
  *   array, in which case hook_TYPE_alter() is invoked for each value in the
  *   array, ordered first by module, and then for each module, in the order of
- *   values in $type. For example, when Form API is using drupal_alter() to
+ *   values in $type. For example, when Form API is using backdrop_alter() to
  *   execute both hook_form_alter() and hook_form_FORM_ID_alter()
  *   implementations, it passes array('form', 'form_' . $form_id) for $type.
  * @param $data
@@ -84,7 +84,7 @@ function module_implements($hook) {
  *   context needs to be provided to implementations, then this should be an
  *   associative array as described above.
  */
-function drupal_alter($type, &$data, &$context1 = NULL, &$context2 = NULL) {
+function backdrop_alter($type, &$data, &$context1 = NULL, &$context2 = NULL) {
   // Function body omitted for this sample.
 }
 

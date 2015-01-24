@@ -77,15 +77,15 @@ function drush_api_reset_queue() {
 function drush_api_count_queues() {
   $rows = array();
 
-  $queue = DrupalQueue::get('api_parse');
+  $queue = BackdropQueue::get('api_parse');
   $num = $queue->numberOfItems();
   $rows[] = array(dt('Parse files'), $num);
 
-  $queue = DrupalQueue::get('api_branch_update');
+  $queue = BackdropQueue::get('api_branch_update');
   $num = $queue->numberOfItems();
   $rows[] = array(dt('Branch update'), $num);
 
-  $queue = DrupalQueue::get('api_node_delete');
+  $queue = BackdropQueue::get('api_node_delete');
   $num = $queue->numberOfItems();
   $rows[] = array(dt('Node cleanup'), $num);
 

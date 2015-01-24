@@ -41,7 +41,7 @@ function api_search_redirect() {
   foreach ($results as $branch) {
     // If we found an exact result, redirect to that branch's search page.
     $_GET['destination'] = 'api/' . $branch->project . '/' . $branch->branch_name . '/search/' . $tail;
-    drupal_goto();
+    backdrop_goto();
   }
 
   // If we get here, there was not an exact match, so look for a partial match.
@@ -56,7 +56,7 @@ function api_search_redirect() {
   foreach ($results as $branch) {
     // We found a partial match, so redirect to that branch's search page.
     $_GET['destination'] = 'api/' . $branch->project . '/' . $branch->branch_name . '/search/' . $tail;
-    drupal_goto();
+    backdrop_goto();
   }
 
   // If we get here, there was not a match.
@@ -70,16 +70,16 @@ function api_search_redirect() {
  * @see api_menu()
  */
 function api_opensearch() {
-  drupal_add_http_header('Content-Type', 'text/xml; charset=utf-8');
+  backdrop_add_http_header('Content-Type', 'text/xml; charset=utf-8');
 
-  $short_name = variable_get('api_opensearch_name', t('Drupal API'));
-  $description = variable_get('api_opensearch_description', t('Drupal API documentation'));
+  $short_name = config_get('api.settings', 'opensearch_name');
+  $description = config_get('api.settings', 'opensearch_description');
   $search_url = url('apis', array('absolute' => TRUE)) . '/{searchTerms}';
   $suggest_url = url('api/suggest', array('absolute' => TRUE)) . '/{searchTerms}';
   $self_url = url($_GET['q'], array('absolute' => TRUE));
 
   // We need to use a theme function, so initialize the theme system.
-  drupal_theme_initialize();
+  backdrop_theme_initialize();
   if (!($image = theme_get_setting('favicon'))) {
     // Fall back on default favicon if the theme didn't provide one.
     $image = 'misc/favicon.ico';
@@ -115,7 +115,7 @@ function api_suggest($search = '') {
     ->range(0, 10)
     ->execute()
     ->fetchCol();
-  print drupal_json_output(array($search, array_values(array_unique($matches))));
+  print backdrop_json_output(array($search, array_values(array_unique($matches))));
 }
 
 /**
@@ -168,7 +168,7 @@ function api_dump_full_list($branch) {
     ->orderBy('d.object_name');
 
   // See if there is a limit or a page number.
-  $params = drupal_get_query_parameters();
+  $params = backdrop_get_query_parameters();
   if (isset($params['limit'])) {
     $page = isset($params['page']) ? (int) $params['page'] : 0;
     $limit = (int) $params['limit'];
@@ -192,7 +192,7 @@ function api_dump_full_list($branch) {
     );
   }
 
-  drupal_json_output($objs);
+  backdrop_json_output($objs);
 }
 
 /**
@@ -242,23 +242,23 @@ function api_search_listing($branch) {
 
   if ($exact) {
     // We found one exact match.
-    drupal_goto(api_url($exact));
+    backdrop_goto(api_url($exact));
   }
 
   // If we get here, there were multiple or zero matches.
   $title = t('Search for !search', array('!search' => $search_text));
-  drupal_set_title($title);
+  backdrop_set_title($title);
   $breadcrumb = array(
     l(t('Home'), '<front>'),
     l(t('API reference'), 'api/' . $branch->project),
     l($branch->title, 'api/' . $branch->project . '/' . $branch->branch_name),
   );
-  drupal_set_breadcrumb($breadcrumb);
+  backdrop_set_breadcrumb($breadcrumb);
   $plain_title = t('Search for @search', array('@search' => $search_text));
   $page_title = array(
     check_plain($plain_title),
     check_plain($branch->title),
-    check_plain(variable_get('site_name', 'Drupal')),
+    check_plain(config_get('system.core', 'site_name')),
   );
   api_set_html_page_title(implode(' | ', $page_title));
 
@@ -314,7 +314,7 @@ function api_search_links($branch, $search_text) {
 function api_page_projects() {
   $output = array();
 
-  $output['project_form'] = drupal_get_form('api_project_form');
+  $output['project_form'] = backdrop_get_form('api_project_form');
 
   $links = api_display_view('api_projects', 'block_project_list', array());
   if ($links) {
@@ -369,12 +369,12 @@ function api_page_file($file) {
 
   api_object_title_and_breadcrumb($branch, $file);
 
-  $documentation = api_link_documentation($file->documentation, $branch, $file->did, NULL, FALSE, FALSE, $file->is_drupal);
-  $see = api_link_documentation($file->see, $branch, $file->did, NULL, TRUE, TRUE, $file->is_drupal);
-  $deprecated = api_link_documentation($file->deprecated, $branch, $file->did, NULL, TRUE, FALSE, $file->is_drupal);
+  $documentation = api_link_documentation($file->documentation, $branch, $file->did, NULL, FALSE, FALSE, $file->is_backdrop);
+  $see = api_link_documentation($file->see, $branch, $file->did, NULL, TRUE, TRUE, $file->is_backdrop);
+  $deprecated = api_link_documentation($file->deprecated, $branch, $file->did, NULL, TRUE, FALSE, $file->is_backdrop);
   $related_topics = api_display_view('api_references', 'block_related_topics', array($file->did));
 
-  $code = api_link_code($file->code, $branch, $file->did, NULL, $file->is_drupal);
+  $code = api_link_code($file->code, $branch, $file->did, NULL, $file->is_backdrop);
   $defined = $file->file_name;
 
   $types = array(
@@ -391,6 +391,7 @@ function api_page_file($file) {
   foreach ($types as $type => $label) {
     // Render the view of this type of object in this file.
     $out = api_display_view('api_listings', 'block_items_file', array($file->object_name, $type, $file->branch_id));
+
     // Only display if there was something there.
     if ($out) {
       $objects[$type] = array(
@@ -400,7 +401,7 @@ function api_page_file($file) {
     }
   }
 
-  $objects = drupal_render($objects);
+  $objects = backdrop_render($objects);
 
   // If this is a theme template or YML file, make reference link.
   $links = api_build_references(array('theme_invokes', 'theme_references', 'yml_config', 'yml_keys'), $file, $branch);
@@ -427,7 +428,7 @@ function api_page_branch($branch) {
   $page_title = array(
     check_plain($branch->title),
     check_plain($title),
-    check_plain(variable_get('site_name', 'Drupal')),
+    check_plain(config_get('system.core', 'site_name')),
   );
   api_set_html_page_title(implode(' | ', $page_title));
 
@@ -467,7 +468,7 @@ function api_page_listing($branch, $object_type, $is_page = TRUE) {
       l(t('API reference'), 'api/' . $branch->project),
       l($branch->title, 'api/' . $branch->project . '/' . $branch->branch_name),
     );
-    drupal_set_breadcrumb($breadcrumb);
+    backdrop_set_breadcrumb($breadcrumb);
 
     $titles = array(
       'class' => t('Classes, traits, and interfaces'),
@@ -481,12 +482,12 @@ function api_page_listing($branch, $object_type, $is_page = TRUE) {
       'service' => t('Services'),
     );
     $title = $titles[$object_type];
-    drupal_set_title($title);
+    backdrop_set_title($title);
 
     $page_title = array(
       check_plain($title),
       check_plain($branch->title),
-      check_plain(variable_get('site_name', 'Drupal')),
+      check_plain(config_get('system.core', 'site_name')),
     );
     api_set_html_page_title(implode(' | ', $page_title));
   }
@@ -574,16 +575,16 @@ function api_page_namespace($project, $branch_name, $namespace) {
     l(t('API reference'), 'api/' . $branch->project),
     l($branch->title, 'api/' . $branch->project . '/' . $branch->branch_name),
   );
-  drupal_set_breadcrumb($breadcrumb);
+  backdrop_set_breadcrumb($breadcrumb);
 
   // Do not use t() here since this is a PHP construct.
   $title = 'namespace ' . $namespace;
-  drupal_set_title($title);
+  backdrop_set_title($title);
 
   $page_title = array(
     check_plain($title),
     check_plain($branch->title),
-    check_plain(variable_get('site_name', 'Drupal')),
+    check_plain(config_get('system.core', 'site_name')),
   );
   api_set_html_page_title(implode(' | ', $page_title));
 
@@ -778,15 +779,15 @@ function api_page_function($function) {
   }
 
   // Build the page sections.
-  $documentation = api_link_documentation($function->documentation, $branch, $function->file_did, $function->class_did, FALSE, FALSE, $function->is_drupal);
+  $documentation = api_link_documentation($function->documentation, $branch, $function->file_did, $function->class_did, FALSE, FALSE, $function->is_backdrop);
 
-  $parameters = api_link_documentation($function->parameters, $branch, $function->file_did, $function->class_did, TRUE, FALSE, $function->is_drupal);
+  $parameters = api_link_documentation($function->parameters, $branch, $function->file_did, $function->class_did, TRUE, FALSE, $function->is_backdrop);
 
-  $return = api_link_documentation($function->return_value, $branch, $function->file_did, $function->class_did, TRUE, FALSE, $function->is_drupal);
-  $see = api_link_documentation($function->see, $branch, $function->file_did, $function->class_did, TRUE, TRUE, $function->is_drupal);
-  $deprecated = api_link_documentation($function->deprecated, $branch, $function->file_did, $function->class_did, TRUE, FALSE, $function->is_drupal);
-  $throws = api_link_documentation($function->throws, $branch, $function->file_did, $function->class_did, TRUE, FALSE, $function->is_drupal);
-  $code = api_link_code($function->code, $branch, $function->file_did, $function->class_did, $function->is_drupal);
+  $return = api_link_documentation($function->return_value, $branch, $function->file_did, $function->class_did, TRUE, FALSE, $function->is_backdrop);
+  $see = api_link_documentation($function->see, $branch, $function->file_did, $function->class_did, TRUE, TRUE, $function->is_backdrop);
+  $deprecated = api_link_documentation($function->deprecated, $branch, $function->file_did, $function->class_did, TRUE, FALSE, $function->is_backdrop);
+  $throws = api_link_documentation($function->throws, $branch, $function->file_did, $function->class_did, TRUE, FALSE, $function->is_backdrop);
+  $code = api_link_code($function->code, $branch, $function->file_did, $function->class_did, $function->is_backdrop);
   $related_topics = api_display_view('api_references', 'block_related_topics', array($function->did));
   $class = api_class_section($function, $branch);
 
@@ -835,18 +836,18 @@ function api_page_function($function) {
  *   overrides.
  * @param $limit
  *   (optional) Limit the number of references returned to this amount.
- * @param bool $is_drupal
- *   (optional) If set to FALSE, and $type is a Drupal-specific type (related
+ * @param bool $is_backdrop
+ *   (optional) If set to FALSE, and $type is a Backdrop-specific type (related
  *   to themes, hooks, or YAML), just return an empty list or zero count.
  *
  * @return
  *   The number of references or an array of references.
  */
-function api_find_references($name, $branch, $type, $count = TRUE, $exclude_did = 0, $limit = 0, $is_drupal = TRUE) {
+function api_find_references($name, $branch, $type, $count = TRUE, $exclude_did = 0, $limit = 0, $is_backdrop = TRUE) {
 
-  // Early return: if this is a Drupal type and $is_drupal is FALSE.
-  $drupal_types = array('implementations', 'theme_invokes', 'theme_references', 'invokes', 'yml_config', 'yml_keys');
-  if (!$is_drupal && in_array($type, $drupal_types)) {
+  // Early return: if this is a Backdrop type and $is_backdrop is FALSE.
+  $backdrop_types = array('implementations', 'theme_invokes', 'theme_references', 'invokes', 'yml_config', 'yml_keys');
+  if (!$is_backdrop && in_array($type, $backdrop_types)) {
     return ($count) ? 0 : array();
   }
 
@@ -980,7 +981,7 @@ function api_find_references($name, $branch, $type, $count = TRUE, $exclude_did 
     // Use pattern matching to find functions that look like implementations of
     // this one. i.e. something_hookname, where "something" doesn't start with
     // an underscore. Note that LIKE uses _ as "match any one character", so
-    // _ has to be escaped in this query. Limit this to Drupal functions.
+    // _ has to be escaped in this query. Limit this to Backdrop functions.
     if (strpos($name, 'hook_') === 0) {
       $hook_name = substr($name, 5);
       // If the hook has an UPPER_CASE_SECTION, allow that to match anything,
@@ -995,12 +996,12 @@ function api_find_references($name, $branch, $type, $count = TRUE, $exclude_did 
         ->condition('d.object_type', 'function')
         ->condition('d.branch_id', $branch_id)
         ->condition('d.did', $exclude_did, '<>')
-        ->condition('d.is_drupal', 1);
+        ->condition('d.is_backdrop', 1);
     }
   }
   elseif ($type == 'theme_invokes' || $type == 'theme_references') {
     // Use reference storage to find functions that call this theme, or
-    // string references to this theme. Limit this to Drupal functions on the
+    // string references to this theme. Limit this to Backdrop functions on the
     // calls.
     $theme_name = '';
     if (strpos($name, 'theme_') === 0) {
@@ -1026,7 +1027,7 @@ function api_find_references($name, $branch, $type, $count = TRUE, $exclude_did 
       $d = $base_query->innerJoin('api_documentation', 'd', 'r.from_did = d.did');
       $base_query->condition($d . '.branch_id', $branch_id)
         ->condition($d . '.did', $exclude_did, '<>')
-        ->condition('d.is_drupal', 1)
+        ->condition('d.is_backdrop', 1)
         ->condition(db_or()->condition('r.object_name', $theme_name)->condition('r.object_name', $theme_name . '\_\_%', 'LIKE'));
       if ($type == 'theme_invokes') {
         $base_query->condition('r.object_type', 'potential theme');
@@ -1052,7 +1053,7 @@ function api_find_references($name, $branch, $type, $count = TRUE, $exclude_did 
     // 'potential hook'; in the last case it is 'potential alter'.
     // So, we need to build a query that will find these matches between
     // $string (field object_name) and $name (passed into this function).
-    // And only do this for Drupal functions.
+    // And only do this for Backdrop functions.
     $or_clauses = db_or();
     $found = FALSE;
 
@@ -1097,7 +1098,7 @@ function api_find_references($name, $branch, $type, $count = TRUE, $exclude_did 
       $d = $base_query->innerJoin('api_documentation', 'd', 'r.from_did = d.did');
       $base_query->condition('d.branch_id', $branch_id)
         ->condition('d.did', $exclude_did, '<>')
-        ->condition('d.is_drupal', 1)
+        ->condition('d.is_backdrop', 1)
         ->condition($or_clauses);
     }
   }
@@ -1123,7 +1124,7 @@ function api_find_references($name, $branch, $type, $count = TRUE, $exclude_did 
   if ($group) {
     $base_query->groupBy('d.did');
   }
-  $base_query->fields('d', array('branch_id', 'object_name', 'title', 'summary', 'file_name', 'object_type', 'class_did', 'is_drupal'))
+  $base_query->fields('d', array('branch_id', 'object_name', 'title', 'summary', 'file_name', 'object_type', 'class_did', 'is_backdrop'))
     ->orderBy('d.title', 'ASC');
   if ($limit > 0) {
     $base_query->range(0, $limit);
@@ -1135,7 +1136,7 @@ function api_find_references($name, $branch, $type, $count = TRUE, $exclude_did 
     $list[] = array(
       'function' => l($object->title, api_url($object)),
       'file' => api_file_link($object),
-      'description' => api_link_documentation($object->summary, $branch, NULL, $object->class_did, FALSE, FALSE, $object->is_drupal),
+      'description' => api_link_documentation($object->summary, $branch, NULL, $object->class_did, FALSE, FALSE, $object->is_backdrop),
     );
   }
 
@@ -1160,16 +1161,17 @@ function api_find_references($name, $branch, $type, $count = TRUE, $exclude_did 
 function api_build_references($types, $object, $branch) {
   $output = array();
   foreach ($types as $type) {
-    $count = api_find_references($object, $branch, $type, TRUE, $object->did, 0, $object->is_drupal);
+    $count = api_find_references($object, $branch, $type, TRUE, $object->did, 0, $object->is_backdrop);
     if ($count > 0) {
-      $limit = variable_get('api_reference_limit', 5);
+      $limit = config_get('api.settings', 'reference_limit');
+      $limit = isset($limit) ? $limit : 5;
       $section = '';
-      $section .= api_list_references($object, $branch, $type, $limit, $object->is_drupal);
+      $section .= api_list_references($object, $branch, $type, $limit, $object->is_backdrop);
       if ($count > $limit) {
         $section .= '<p>' . theme('api_function_reference_link', array('type' => $type, 'count' => $count, 'function' => $object, 'override_text' => t('... See full list'))) . '</p>';
       }
       $title = api_reference_text($type, $count, $object);
-      $output[] = theme('ctools_collapsible', array('content' => $section, 'handle' => $title, 'collapsed' => TRUE));
+      $output[] = api_collapsible($title, $section);
     }
   }
 
@@ -1190,11 +1192,11 @@ function api_build_references($types, $object, $branch) {
 function api_page_function_calls($function, $type) {
   $branch = api_get_branch_by_id($function->branch_id);
 
-  $call_count = api_find_references($function, $branch, $type, TRUE, $function->did, 0, $function->is_drupal);
+  $call_count = api_find_references($function, $branch, $type, TRUE, $function->did, 0, $function->is_backdrop);
   $call_title = api_reference_text($type, $call_count, $function);
   api_object_title_and_breadcrumb($branch, $function, $call_title, TRUE);
 
-  return api_list_references($function, $branch, $type, 0, $function->is_drupal);
+  return api_list_references($function, $branch, $type, 0, $function->is_backdrop);
 }
 
 /**
@@ -1208,15 +1210,15 @@ function api_page_function_calls($function, $type) {
  *   Type of references: see api_find_references() for list.
  * @param $limit
  *   (optional) Limit list to a few references.
- * @param bool $is_drupal
- *   (optional) If set to FALSE, and $type is a Drupal-specific type (such as
+ * @param bool $is_backdrop
+ *   (optional) If set to FALSE, and $type is a Backdrop-specific type (such as
  *   theme- or hook- related), just return an empty list or zero count.
  *
  * @return string
  *   HTML for a list of references.
  */
-function api_list_references($object, $branch, $type, $limit = 0, $is_drupal = FALSE) {
-  $call_functions = api_find_references($object, $branch, $type, FALSE, $object->did, $limit, $is_drupal);
+function api_list_references($object, $branch, $type, $limit = 0, $is_backdrop = FALSE) {
+  $call_functions = api_find_references($object, $branch, $type, FALSE, $object->did, $limit, $is_backdrop);
 
   $note = '';
   if ($type == 'implementations') {
@@ -1269,11 +1271,11 @@ function api_page_simple_item($item, $type) {
 
   api_object_title_and_breadcrumb($branch, $item);
 
-  $documentation = api_link_documentation($item->documentation, $branch, $item->file_did, $item->class_did, FALSE, FALSE, $item->is_drupal);
-  $code = api_link_code($item->code, $branch, $item->file_did, $item->class_did, $item->is_drupal);
+  $documentation = api_link_documentation($item->documentation, $branch, $item->file_did, $item->class_did, FALSE, FALSE, $item->is_backdrop);
+  $code = api_link_code($item->code, $branch, $item->file_did, $item->class_did, $item->is_backdrop);
   $related_topics = api_display_view('api_references', 'block_related_topics', array($item->did));
-  $see = api_link_documentation($item->see, $branch, $item->file_did, $item->class_did, TRUE, TRUE, $item->is_drupal);
-  $deprecated = api_link_documentation($item->deprecated, $branch, $item->file_did, $item->class_did, TRUE, FALSE, $item->is_drupal);
+  $see = api_link_documentation($item->see, $branch, $item->file_did, $item->class_did, TRUE, TRUE, $item->is_backdrop);
+  $deprecated = api_link_documentation($item->deprecated, $branch, $item->file_did, $item->class_did, TRUE, FALSE, $item->is_backdrop);
   $var = '';
   if ($type == 'property') {
     $var = api_link_name($item->var, $branch, '', '', $item->file_did, $item->class_did, NULL, FALSE, TRUE, NULL, NULL, 'class');
@@ -1311,11 +1313,11 @@ function api_page_class($class) {
 
   api_object_title_and_breadcrumb($branch, $class);
 
-  $documentation = api_link_documentation($class->documentation, $branch, $class->file_did, $class->did, FALSE, FALSE, $class->is_drupal);
+  $documentation = api_link_documentation($class->documentation, $branch, $class->file_did, $class->did, FALSE, FALSE, $class->is_backdrop);
   $related_topics = api_display_view('api_references', 'block_related_topics', array($class->did));
-  $code = api_link_code($class->code, $branch, $class->file_did, $class->did, $class->is_drupal);
-  $see = api_link_documentation($class->see, $branch, $class->file_did, $class->did, TRUE, TRUE, $class->is_drupal);
-  $deprecated = api_link_documentation($class->deprecated, $branch, $class->file_did, $class->did, TRUE, FALSE, $class->is_drupal);
+  $code = api_link_code($class->code, $branch, $class->file_did, $class->did, $class->is_backdrop);
+  $see = api_link_documentation($class->see, $branch, $class->file_did, $class->did, TRUE, TRUE, $class->is_backdrop);
+  $deprecated = api_link_documentation($class->deprecated, $branch, $class->file_did, $class->did, TRUE, FALSE, $class->is_backdrop);
 
   // Figure out the class hierarchy.
   $hierarchy = api_class_hierarchy($class);
@@ -1377,7 +1379,7 @@ function api_page_class($class) {
     );
   }
 
-  $objects = drupal_render($objects);
+  $objects = backdrop_render($objects);
 
   $reference_types = array('uses', 'references', 'services');
   if ($class->object_type == 'class') {
@@ -1410,8 +1412,8 @@ function api_page_service($service) {
 
   // The class name (if there is one), or some other information is stored
   // in the documentation field.
-  $class = api_link_documentation($service->documentation, $branch, $service->file_did, 0, TRUE, FALSE, $service->is_drupal);
-  $code = api_link_code($service->code, $branch, $service->file_did, $service->did, $service->is_drupal);
+  $class = api_link_documentation($service->documentation, $branch, $service->file_did, 0, TRUE, FALSE, $service->is_backdrop);
+  $code = api_link_code($service->code, $branch, $service->file_did, $service->did, $service->is_backdrop);
 
   // Make a list of the service tags. These are in the api_references table.
   $results = db_select('api_reference_storage', 'r')
@@ -1452,8 +1454,8 @@ function api_page_group($group) {
 
   api_object_title_and_breadcrumb($branch, $group);
 
-  $documentation = api_link_documentation($group->documentation, $branch, $group->file_did, NULL, FALSE, FALSE, $group->is_drupal);
-  $see = api_link_documentation($group->see, $branch, $group->file_did, NULL, TRUE, TRUE, $group->is_drupal);
+  $documentation = api_link_documentation($group->documentation, $branch, $group->file_did, NULL, FALSE, FALSE, $group->is_backdrop);
+  $see = api_link_documentation($group->see, $branch, $group->file_did, NULL, TRUE, TRUE, $group->is_backdrop);
   $related_topics = api_display_view('api_references', 'block_related_topics', array($group->did));
 
   // Find and render all items in this group.
@@ -1481,7 +1483,7 @@ function api_page_group($group) {
     }
   }
 
-  $objects = drupal_render($objects);
+  $objects = backdrop_render($objects);
 
   $output = theme('api_group_page', array('branch' => $branch, 'object' => $group, 'documentation' => $documentation, 'objects' => $objects, 'see' => $see, 'related_topics' => $related_topics));
   $output .= _api_add_comments($group);
@@ -1516,7 +1518,7 @@ function api_object_title_and_breadcrumb($branch, $object, $title = NULL, $objec
   else {
     $h1title = $title;
   }
-  drupal_set_title($h1title, PASS_THROUGH);
+  backdrop_set_title($h1title, PASS_THROUGH);
 
   $breadcrumb = array(
     l(t('Home'), '<front>'),
@@ -1524,7 +1526,7 @@ function api_object_title_and_breadcrumb($branch, $object, $title = NULL, $objec
     l($branch->title, 'api/' . $branch->project . '/' . $branch->branch_name),
   );
   $page_title = array(
-    check_plain(variable_get('site_name', 'Drupal')),
+    check_plain(config_get('system.core', 'site_name')),
     check_plain($branch->title),
   );
 
@@ -1550,7 +1552,7 @@ function api_object_title_and_breadcrumb($branch, $object, $title = NULL, $objec
 
   $page_title[] = $title;
 
-  drupal_set_breadcrumb($breadcrumb);
+  backdrop_set_breadcrumb($breadcrumb);
   api_set_html_page_title(implode(' | ', array_reverse($page_title)));
 }
 
@@ -1790,20 +1792,20 @@ function api_class_hierarchy_line($class, $current_did = 0) {
  */
 function _api_add_comments($documentation_object) {
   $output = '';
-
-  if (module_exists('comment') && user_access('access comments') && variable_get('comment_api', COMMENT_NODE_OPEN) != COMMENT_NODE_HIDDEN) {
+  $node_type = node_type_get_type('api');
+  if (module_exists('comment') && user_access('access comments') && $node_type->settings['comment_default'] != COMMENT_NODE_HIDDEN) {
     // Let the Comment module output the comments and comment form.
     $additions = comment_node_page_additions(node_load($documentation_object->did));
     // If the comment form wasn't included, see if authenticated users can post
     // comments, and add a link saying to log in to post.
     if (!isset($additions['comment_form'])) {
-      $roles = user_roles(TRUE, 'post_comments');
-      if (array_key_exists(DRUPAL_AUTHENTICATED_RID, $roles)) {
+      $roles = user_roles(TRUE, 'post comments');
+      if (array_key_exists(BACKDROP_AUTHENTICATED_ROLE, $roles)) {
         $options = array(
-          'query' => drupal_get_destination(),
+          'query' => backdrop_get_destination(),
           'fragment' => 'comment-form',
         );
-        if (variable_get('user_register', 1)) {
+        if (config_get('system.core', 'user_register') !== USER_REGISTER_ADMINISTRATORS_ONLY) {
           // Users can register themselves.
           $additions['login_link'] = array(
             '#type' => 'markup',
@@ -1819,7 +1821,7 @@ function _api_add_comments($documentation_object) {
         }
       }
     }
-    $output .= drupal_render($additions);
+    $output .= backdrop_render($additions);
   }
 
   return $output;

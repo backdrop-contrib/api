@@ -13,7 +13,7 @@ module_load_include('inc', 'api', 'parser');
 /**
  * Provides a base class for testing the API module.
  */
-class ApiTestCase extends DrupalWebTestCase {
+class ApiTestCase extends BackdropWebTestCase {
   /**
    * Default branch object.
    */
@@ -42,10 +42,10 @@ class ApiTestCase extends DrupalWebTestCase {
    * Sets up modules for API tests, and a super-user.
    */
   function baseSetUp() {
-    DrupalWebTestCase::setUp('api', 'ctools', 'gplib', 'node', 'comment', 'dblog', 'views');
+    BackdropWebTestCase::setUp('api', 'node', 'comment', 'dblog', 'views');
 
     // For debug purposes, visit the Recent Log Messages report page.
-    $this->drupalGet('admin/reports/dblog');
+    $this->backdropGet('admin/reports/dblog');
 
     $this->verifyCounts(array(
         'api_project' => 0,
@@ -63,7 +63,7 @@ class ApiTestCase extends DrupalWebTestCase {
       ), 0, 'Immediately after install');
 
     // Set up a super-user.
-    $this->super_user = $this->drupalCreateUser(array(
+    $this->super_user = $this->backdropCreateUser(array(
       'access API reference',
       'administer API reference',
       'access content',
@@ -73,7 +73,7 @@ class ApiTestCase extends DrupalWebTestCase {
       'access site reports',
       'administer site configuration',
     ));
-    $this->drupalLogin($this->super_user);
+    $this->backdropLogin($this->super_user);
   }
 
   /**
@@ -101,10 +101,10 @@ class ApiTestCase extends DrupalWebTestCase {
       'project_type' => 'module',
       'branch_name' => '6',
       'title' => 'Testing 6',
-      'core_compatibility' => '7.x',
+      'core_compatibility' => '1.x',
       'update_frequency' => 1,
-      'directory' => drupal_get_path('module', 'api') . '/tests/sample',
-      'excluded' => drupal_get_path('module', 'api') . '/tests/sample/to_exclude',
+      'directory' => backdrop_get_path('module', 'api') . '/tests/sample',
+      'excluded' => backdrop_get_path('module', 'api') . '/tests/sample/to_exclude',
       'regexps' => '',
     );
     $info['preferred'] = $default ? 1 : 0;
@@ -137,7 +137,7 @@ class ApiTestCase extends DrupalWebTestCase {
     api_save_branch($branch);
 
     if ($default) {
-      $this->assertEqual(variable_get('api_default_branch', 99), $branch->branch_id, 'Variable for default branch is set correctly');
+      $this->assertEqual(config_get('api.settings', 'default_branch'), $branch->branch_id, 'Variable for default branch is set correctly');
     }
 
     return $info;
@@ -184,7 +184,7 @@ class ApiTestCase extends DrupalWebTestCase {
    */
   function resetBranchesAndCache() {
     cache_clear_all('variables', 'cache_bootstrap', 'cache');
-    drupal_static_reset();
+    backdrop_static_reset();
     variable_initialize();
     api_reset_branches();
   }
@@ -196,12 +196,12 @@ class ApiTestCase extends DrupalWebTestCase {
     api_update_all_branches();
 
     $queues = api_cron_queue_info();
-    drupal_alter('cron_queue_info', $queues);
+    backdrop_alter('cron_queue_info', $queues);
 
     $queue_name = 'api_branch_update';
     $info = $queues[$queue_name];
     $function = $info['worker callback'];
-    $queue = DrupalQueue::get($queue_name);
+    $queue = BackdropQueue::get($queue_name);
 
     $count = 0;
     while ($item = $queue->claimItem()) {
@@ -223,12 +223,12 @@ class ApiTestCase extends DrupalWebTestCase {
    */
   function processApiParseQueue($verbose = FALSE) {
     $queues = api_cron_queue_info();
-    drupal_alter('cron_queue_info', $queues);
+    backdrop_alter('cron_queue_info', $queues);
 
     $queue_name = 'api_parse';
     $info = $queues[$queue_name];
     $function = $info['worker callback'];
-    $queue = DrupalQueue::get($queue_name);
+    $queue = BackdropQueue::get($queue_name);
 
     $count = 0;
     while ($item = $queue->claimItem()) {
@@ -250,7 +250,7 @@ class ApiTestCase extends DrupalWebTestCase {
    * Returns the approximate number of items in the API parse queue.
    */
   function countParseQueue() {
-    $queue = DrupalQueue::get('api_parse');
+    $queue = BackdropQueue::get('api_parse');
     return $queue->numberOfItems();
   }
 
@@ -306,14 +306,14 @@ class ApiTestCase extends DrupalWebTestCase {
    *   Array of messages to assert are not in the log.
    */
   function checkAndClearLog($messages = array(), $notmessages = array()) {
-    $this->drupalGet('admin/reports/dblog');
+    $this->backdropGet('admin/reports/dblog');
     foreach($messages as $message) {
       $this->assertRaw($message, "Message $message appears in the log");
     }
     foreach($notmessages as $message) {
       $this->assertNoRaw($message, "Message $message does not appear in the log");
     }
-    $this->drupalPost(NULL, array(), t('Clear log messages'));
+    $this->backdropPost(NULL, array(), t('Clear log messages'));
   }
 }
 
@@ -383,11 +383,11 @@ class ApiWebPagesBaseTest extends ApiTestCase {
       'project_type' => 'module',
       'branch_name' => '6',
       'title' => 'Testing 6',
-      'core_compatibility' => '7.x',
+      'core_compatibility' => '1.x',
       'update_frequency' => 1,
-      'directory' => drupal_get_path('module', 'api') . '/tests/sample',
-      'excluded' => drupal_get_path('module', 'api') . '/tests/sample/to_exclude',
-      'exclude_drupalism_regexp' => '',
+      'directory' => backdrop_get_path('module', 'api') . '/tests/sample',
+      'excluded' => backdrop_get_path('module', 'api') . '/tests/sample/to_exclude',
+      'exclude_backdropism_regexp' => '',
       'regexps' => '',
     );
     $info['preferred'] = $default ? 1 : 0;
@@ -398,7 +398,7 @@ class ApiWebPagesBaseTest extends ApiTestCase {
       'project_type' => $info['project_type'],
       'project_title' => $info['project_title'],
     );
-    $this->drupalPost('admin/config/development/api/projects/new',
+    $this->backdropPost('admin/config/development/api/projects/new',
       $project_info,
       t('Save project')
     );
@@ -413,12 +413,12 @@ class ApiWebPagesBaseTest extends ApiTestCase {
       'update_frequency' => $info['update_frequency'],
       'data[directories]' => $prefix . $info['directory'],
       'data[exclude_files_regexp]' => $info['regexps'],
-      'data[exclude_drupalism_regexp]' => $info['exclude_drupalism_regexp'],
+      'data[exclude_backdropism_regexp]' => $info['exclude_backdropism_regexp'],
     );
     if ($info['excluded'] != 'none') {
       $branch_info['data[excluded_directories]'] = $prefix . $info['excluded'];
     }
-    $this->drupalPost('admin/config/development/api/branches/new',
+    $this->backdropPost('admin/config/development/api/branches/new',
       $branch_info,
       t('Save branch')
     );
@@ -428,7 +428,7 @@ class ApiWebPagesBaseTest extends ApiTestCase {
       // the setup for the branch, because the API module will override the
       // setting if the branch doesn't exist yet, in an attempt to make sure
       // a branch exists.
-      $this->drupalPost('admin/config/development/api', array(
+      $this->backdropPost('admin/config/development/api', array(
           'api_default_core_compatibility' => $info['core_compatibility'],
           'api_default_project' => $info['project'],
         ), t('Save configuration'));
@@ -437,7 +437,7 @@ class ApiWebPagesBaseTest extends ApiTestCase {
       $this_id = 0;
       foreach ($branches as $branch) {
         if ($branch->title == $info['title']) {
-          $this->assertEqual(variable_get('api_default_branch', 99), $branch->branch_id, 'Variable for default branch is set correctly');
+          $this->assertEqual(config_get('api.settings', 'default_branch'), $branch->branch_id, 'Variable for default branch is set correctly');
           break;
         }
       }
@@ -455,12 +455,12 @@ class ApiWebPagesBaseTest extends ApiTestCase {
   function createPHPBranchUI() {
     $info = array(
       'title' => 'php2',
-      'data[summary]' => url('<front>', array('absolute' => TRUE )) . '/' . drupal_get_path('module', 'api') . '/tests/php_sample/funcsummary.json',
+      'data[summary]' => url('<front>', array('absolute' => TRUE )) . '/' . backdrop_get_path('module', 'api') . '/tests/php_sample/funcsummary.json',
       'data[path]' => 'http://example.com/function/!function',
       'update_frequency' => 1,
     );
 
-    $this->drupalPost('admin/config/development/api/php_branches/new',
+    $this->backdropPost('admin/config/development/api/php_branches/new',
       $info,
       t('Save branch')
     );
@@ -481,16 +481,16 @@ class ApiWebPagesBaseTest extends ApiTestCase {
   function createAPIBranchUI($info = array()) {
     $info += array(
       'title' => 'sample_api_branch',
-      'data[url]' => url('<front>', array('absolute' => TRUE )) . '/' . drupal_get_path('module', 'api') . '/tests/php_sample/sample_drupal_listing.json',
+      'data[url]' => url('<front>', array('absolute' => TRUE )) . '/' . backdrop_get_path('module', 'api') . '/tests/php_sample/sample_backdrop_listing.json',
       'data[search_url]' => url('<front>', array('absolute' => TRUE )) . '/api/test_api_project/test_api_branch/search/',
-      'data[core_compatibility]' => '7.x',
+      'data[core_compatibility]' => '1.x',
       'data[project_type]' => 'core',
       'data[page_limit]' => 2000,
       'data[timeout]' => 30,
       'update_frequency' => 1,
     );
 
-    $this->drupalPost('admin/config/development/api/php_branches/new_api',
+    $this->backdropPost('admin/config/development/api/php_branches/new_api',
       $info,
       t('Save branch')
     );
@@ -511,7 +511,7 @@ class ApiWebPagesBaseTest extends ApiTestCase {
    *   Message to use for URL matching assertion.
    */
   protected function assertLinkURL($label, $url, $message_link, $message_url) {
-    // Code follows DrupalWebTestCase::clickLink() and assertLink().
+    // Code follows BackdropWebTestCase::clickLink() and assertLink().
     $links = $this->xpath('//a[text()="' . $label . '"]');
     $this->assert(isset($links[0]), $message_link);
     if (isset($links[0])) {
@@ -535,7 +535,7 @@ class ApiWebPagesBaseTest extends ApiTestCase {
    *   Index of the link on the page, like assertLink().
    */
   protected function assertLinkURLSubstring($label, $url, $message_link, $message_url, $index = 0) {
-    // Code follows DrupalWebTestCase::clickLink() and assertLink().
+    // Code follows BackdropWebTestCase::clickLink() and assertLink().
     $links = $this->xpath('//a[text()="' . $label . '"]');
     $this->assert(isset($links[$index]), $message_link);
     if (isset($links[$index])) {

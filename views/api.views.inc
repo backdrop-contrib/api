@@ -868,14 +868,14 @@ function api_views_plugins() {
     'help' => t('Displays rows as an HTML definition list.'),
     'handler' => 'api_views_plugin_style_dl_list',
     'theme' => 'api_views_view_dl_list',
-    'theme path' => drupal_get_path('module', 'api') . '/templates',
+    'theme path' => backdrop_get_path('module', 'api') . '/templates',
     'theme file' => 'api.theme.inc',
     'register theme' => FALSE,
     'uses row plugin' => TRUE,
     'uses row class' => TRUE,
     'uses options' => TRUE,
     'type' => 'normal',
-    'path' => drupal_get_path('module', 'api') . '/views',
+    'path' => backdrop_get_path('module', 'api') . '/views',
   );
 
   return $plugins;
@@ -887,7 +887,7 @@ function api_views_plugins() {
  * Options callback for filtering by project type.
  */
 function api_list_project_type_options() {
-  return drupal_map_assoc(db_select('api_project', 'p')
+  return backdrop_map_assoc(db_select('api_project', 'p')
     ->fields('p', array('project_type'))
     ->groupBy('p.project_type')
     ->orderBy('p.project_type')

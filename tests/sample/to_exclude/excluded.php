@@ -9,7 +9,7 @@
  * An excluded function that should not be in the package.
  */
 function excluded_function() {
-  // This is for testing whether we can exclude "drupalisms" from this file.
+  // This is for testing whether we can exclude "backdropisms" from this file.
   $baz = theme('sample_two', $foo);
   // But this should make a link.
   $foo = sample_function();

@@ -74,7 +74,7 @@ define('SAMPLE_CONSTANT', 7);
  * And here is a code block with indentation:
  * @code
  *   $message = t('An error occurred.');
- *   drupal_set_message($message, 'error');
+ *   backdrop_set_message($message, 'error');
  *   $output .= $message;
  * @endcode
  *
@@ -82,7 +82,7 @@ define('SAMPLE_CONSTANT', 7);
  * - Here is some code:
  *   @code
  *   $message = t('An error occurred.');
- *   drupal_set_message($message, 'error');
+ *   backdrop_set_message($message, 'error');
  *   $output .= $message;
  *   @endcode
  *
@@ -132,7 +132,7 @@ function sample_function($parameter, $complex_parameter) {
  * $foo = sample_function();
  * $bar = theme('sample_one', $foo);
  * $x = module_invoke_all('sample_name', $foo, $bar);
- * $xx = drupal_alter('another_sample', $foo);
+ * $xx = backdrop_alter('another_sample', $foo);
  * $k = SAMPLE_CONSTANT;
  * @endcode
  *
@@ -274,7 +274,7 @@ function sample_in_code_links() {
   }
 
   // Should link to alter hook.
-  $xx = drupal_alter('another_sample', $foo);
+  $xx = backdrop_alter('another_sample', $foo);
 
   // Should link to search for this function.
   $z = duplicate_function();
@@ -301,7 +301,7 @@ function sample_in_code_links() {
   foreach (module_implements('nonexistent_hook') as $module) {
     module_invoke($module, 'nonexistent_hook', $foo);
   }
-  $d = drupal_alter('nonexistent_alter_name', $foo);
+  $d = backdrop_alter('nonexistent_alter_name', $foo);
 
   // This should make a link only if the second sample is loaded.
   $x = second_sample_function();
@@ -333,7 +333,7 @@ function sample_name() {
 function another_sample() {
   // This should turn into a link to the hook, and the hook should reference
   // this function as an invoker.
-  drupal_alter('another_sample');
+  backdrop_alter('another_sample');
   $foo = sample_function();
 }
 

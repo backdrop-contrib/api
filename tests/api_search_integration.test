@@ -25,10 +25,10 @@ class ApiSearchIntegrationTestCase extends ApiWebPagesBaseTest {
   }
 
   function setUp() {
-    DrupalWebTestCase::setUp('api', 'ctools', 'gplib', 'views', 'node', 'search', 'dblog', 'api_search');
+    BackdropWebTestCase::setUp('api', 'views', 'node', 'search', 'dblog', 'api_search');
 
     // Set up a new super-user.
-    $this->super_user = $this->drupalCreateUser(array(
+    $this->super_user = $this->backdropCreateUser(array(
       'access API reference',
       'administer API reference',
       'access content',
@@ -38,12 +38,12 @@ class ApiSearchIntegrationTestCase extends ApiWebPagesBaseTest {
     ));
 
     // Set up a restricted user.
-    $this->restricted_user = $this->drupalCreateUser(array(
+    $this->restricted_user = $this->backdropCreateUser(array(
       'access content',
       'search content',
     ));
 
-    $this->drupalLogin($this->super_user);
+    $this->backdropLogin($this->super_user);
 
     // Set up a regular files branch.
     $this->branch_info = $this->setUpBranchUI();
@@ -58,7 +58,7 @@ class ApiSearchIntegrationTestCase extends ApiWebPagesBaseTest {
     $this->cronRun();
 
     // Visit the search page and verify indexing is complete.
-    $this->drupalGet('admin/config/search/settings');
+    $this->backdropGet('admin/config/search/settings');
     $this->assertText('There are 0 items left to index', 'Site is fully indexed');
   }
 
@@ -80,15 +80,15 @@ class ApiSearchIntegrationTestCase extends ApiWebPagesBaseTest {
     );
 
     foreach($terms as $term) {
-      $this->drupalPost('search/node', array('keys' => $term), t('Search'));
+      $this->backdropPost('search/node', array('keys' => $term), t('Search'));
       $this->assertLinkUrlSubstring('sample_function | function | sample.php | ' . $this->branch_info['title'], 'sample.php/function/sample_function', 'sample_function page title is in search results for ' . $term, 'sample_function link is in search results for ' . $term);
     }
 
     // Now log in as the restricted user and verify that the searches do
     // not give the API results.
-    $this->drupalLogin($this->restricted_user);
+    $this->backdropLogin($this->restricted_user);
     foreach($terms as $term) {
-      $this->drupalPost('search/node', array('keys' => $term), t('Search'));
+      $this->backdropPost('search/node', array('keys' => $term), t('Search'));
       $this->assertText('Your search yielded no results', 'No search results with restricted user who cannot see API documentation');
     }
   }

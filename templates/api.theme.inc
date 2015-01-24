@@ -31,7 +31,7 @@ function api_preprocess_api_class_section(&$variables) {
   $class = $variables['class'];
   $branch = $variables['branch'];
   $variables['class_link'] = l($class->title, api_url($class));
-  $variables['class_info'] = api_link_documentation($class->summary, $branch, $class->file_did, $class->class_did, FALSE, FALSE, $class->is_drupal);
+  $variables['class_info'] = api_link_documentation($class->summary, $branch, $class->file_did, $class->class_did, FALSE, FALSE, $class->is_backdrop);
 }
 
 /**
@@ -97,7 +97,7 @@ function api_preprocess_api_object_page(&$variables) {
     $count++;
   }
   if ($count > 1) {
-    $variables['alternatives'] = drupal_render($alternatives);
+    $variables['alternatives'] = backdrop_render($alternatives);
   }
   else {
     $variables['alternatives'] = '';
@@ -173,11 +173,11 @@ function api_preprocess_views_view_dl_list(&$variables) {
 
   $handler  = $variables['view']->style_plugin;
 
-  $class = explode(' ', $handler->options['class']);
-  $class = array_map('views_clean_css_identifier', $class);
+  $class = explode(' ', $variables['options']['class']);
+  $class = array_map('backdrop_clean_css_identifier', $class);
 
   $wrapper_class = explode(' ', $handler->options['wrapper_class']);
-  $wrapper_class = array_map('views_clean_css_identifier', $wrapper_class);
+  $wrapper_class = array_map('backdrop_clean_css_identifier', $wrapper_class);
 
   $variables['list_class'] = implode(' ', $class);
   $variables['wrapper_class'] = implode(' ', $wrapper_class);

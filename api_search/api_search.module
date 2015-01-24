@@ -1,19 +1,8 @@
 <?php
-
 /**
  * @file
  * Search integration for the API module.
  */
-
-/**
- * Implements hook_help().
- */
-function api_search_help($path, $arg) {
-  switch ($path) {
-    case 'admin/help#api_search':
-      return t('The API Search Integration module provides search integration (Drupal Core search and Solr search with project https://drupal.org/project/apachesolr) for the API module.');
-  }
-}
 
 /**
  * Implements hook_menu().
@@ -25,7 +14,7 @@ function api_search_menu() {
     'title' => 'Search configuration',
     'access callback' => 'user_access',
     'access arguments' => array('administer API reference'),
-    'page callback' => 'drupal_get_form',
+    'page callback' => 'backdrop_get_form',
     'page arguments' => array('api_search_admin_form'),
     'type' => MENU_LOCAL_TASK,
     'weight' => 30,
@@ -70,12 +59,15 @@ function api_search_node_view($node, $view_mode, $langcode) {
   $node->title = $title;
 
   // Add extra fields of information.
-  $fields = array('namespaced_name', 'modifiers', 'object_type', 'summary', 'documentation', 'var', 'parameters', 'return_value', 'throws');
-
+  $fields = array('title', 'object_type', 'summary', 'documentation', 'modifiers', 'var', 'parameters', 'return_value', 'throws');
   foreach ($fields as $field) {
     if (isset($doc->$field) && trim($doc->$field)) {
+      $text = $doc->$field;
+      if ($field === 'object_type') {
+        $text = '(' . $text . ')';
+      }
       $node->content['api_' . $field] = array(
-        '#markup' => '<div>' . $doc->$field . '</div>',
+        '#markup' => '<div>' . $text . '</div>',
       );
     }
   }
@@ -140,8 +132,8 @@ function api_search_api_ignore_node_access($query) {
   }
 
   // For Apache Solr, the query should be a subclass of
-  // DrupalSolrQueryInterface.
-  if ($query instanceof DrupalSolrQueryInterface) {
+  // BackdropSolrQueryInterface.
+  if ($query instanceof BackdropSolrQueryInterface) {
     return TRUE;
   }
 
@@ -181,7 +173,7 @@ function api_search_apachesolr_index_document_build_node(ApacheSolrDocument $doc
   // First, trigger generating the list of labels.
   $label = entity_bundle_label('node', 'api');
   // Then, fix it up so next time we don't get more PHP notices.
-  $labels = &drupal_static('entity_bundle_label', array());
+  $labels = &backdrop_static('entity_bundle_label', array());
   if (!empty($labels) && !isset($labels['node']['api'])) {
     $labels['node']['api'] = t('API documentation');
   }
@@ -228,7 +220,7 @@ function api_search_facetapi_facet_info(array $searcher_info) {
     'ss_apidoc_branch' => array(t('Branch'), t('Branch the API documentation is in')),
     'ss_apidoc_project' => array(t('Project'), t('Project the API documentation is in')),
     'ss_apidoc_type' => array(t('Object type'), t('Function, class, etc.')),
-    'ss_apidoc_compat' => array(t('Core compatibility'), t('Drupal Core version compatibility')),
+    'ss_apidoc_compat' => array(t('Core compatibility'), t('Backdrop Core version compatibility')),
   );
 
   $facets = array();
@@ -261,21 +253,7 @@ function api_search_make_node_title($doc) {
     return '';
   }
 
-  $title = array();
-
-  $title[] = $doc->title;
-
-  if ($doc->object_type != 'group' && $doc->object_type != 'file') {
-    $title[] = trim($doc->modifiers . ' ' . $doc->object_type);
-  }
-
-  if ($doc->object_type !== 'file') {
-    $title[] = basename($doc->file_name);
-  }
-
-  $title[] = $branch->title;
-
-  return implode(' | ', $title);
+  return $doc->title;
 }
 
 /**
@@ -286,21 +264,37 @@ function api_search_make_node_title($doc) {
  */
 function api_search_admin_form($form, &$form_state) {
 
-  $form['api_search_core_compatibilities'] = array(
+  $form['search_core_compatibilities'] = array(
     '#type' => 'textfield',
-    '#default_value' => variable_get('api_search_core_compatibilities', ''),
+    '#default_value' => config_get('api.settings', 'search_core_compatibilities'),
     '#title' => t('Core compatibilities to make searchable'),
-    '#description' => t('Separate by commas.'),
+    '#description' => t('Separate by commas. A list of core compatibility values can be found in the <a href="!url">branches list</a>', array('!url' => url('admin/config/development/api/branches'))),
   );
 
   $form['info'] = array(
     '#markup' => t('Submitting this form will immediately cause incompatible information to be removed from search indexes. This can take some time.'),
   );
 
-  $form = system_settings_form($form);
-  $form['#submit'][] = 'api_search_update_compatibilities';
+  $form['actions']['#type'] = 'actions';
+  $form['actions']['submit'] = array(
+    '#type' => 'submit',
+    '#value' => t('Save configuration'),
+    '#submit' => array(
+      'api_search_admin_form_submit',
+      'api_search_update_compatibilities',
+    ),
+  );
 
   return $form;
+}
+
+/**
+ * Submit handler for api_search_admin_form().
+ */
+function api_search_admin_form_submit($form, &$form_state) {
+  $config = config('api.settings');
+  $config->set('search_core_compatibilities', $form_state['values']['search_core_compatibilities']);
+  $config->save();
 }
 
 /**
@@ -336,7 +330,7 @@ function api_search_find_compatibilities() {
   static $compatibilities = NULL;
   if (!isset($compatibilities)) {
     $compatibilities = array();
-    $var = trim(variable_get('api_search_core_compatibilities', ''));
+    $var = trim(config_get('api.settings', 'search_core_compatibilities'));
     $branches = api_get_branches();
     foreach ($branches as $branch) {
       $core = $branch->core_compatibility;

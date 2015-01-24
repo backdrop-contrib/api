@@ -23,7 +23,7 @@ class ApiNamespacesTestCase extends ApiWebPagesBaseTest {
     $this->baseSetUp();
 
     // Set up a files branch for the namespaces files.
-    $this->branch_info = $this->setUpBranchUI('', TRUE, array('directory' => drupal_get_path('module', 'api') . '/tests/sample_namespace', 'excluded' => ''));
+    $this->branch_info = $this->setUpBranchUI('', TRUE, array('directory' => backdrop_get_path('module', 'api') . '/tests/sample_namespace', 'excluded' => ''));
 
     // We don't need the PHP branch for this test, so for speed, remove it.
     $this->removePHPBranch();
@@ -39,7 +39,7 @@ class ApiNamespacesTestCase extends ApiWebPagesBaseTest {
    */
   function testNamespacePages() {
     // Test namespaces page.
-    $this->drupalGet('api/' . $this->branch_info['project'] . '/namespaces');
+    $this->backdropGet('api/' . $this->branch_info['project'] . '/namespaces');
     $this->assertLink('api\\test1', 0, 'First namespace link is there');
     $this->assertLink('api\\test2', 0, 'Second namespace link is there');
 
@@ -71,7 +71,7 @@ class ApiNamespacesTestCase extends ApiWebPagesBaseTest {
     $this->assertLink('\\api\\test2\\InterfaceC', 0, 'Link to param type is there');
 
     // Test contents of second namespace page.
-    $this->drupalGet('api/' . $this->branch_info['project'] . '/namespaces');
+    $this->backdropGet('api/' . $this->branch_info['project'] . '/namespaces');
     $this->clickLink('api\\test2');
     $this->assertLink('ClassB', 0, 'ClassB is on second namespace page');
     $this->assertLink('ClassE', 0, 'ClassE is on second namespace page');
@@ -86,14 +86,14 @@ class ApiNamespacesTestCase extends ApiWebPagesBaseTest {
     $this->assertLink('\\api\\test1\\InterfaceD', 0, 'Link to type of member variable is there');
 
     // Verify namespace links on file pages.
-    $this->drupalGet('api/' . $this->branch_info['project'] . '/ClassA.php');
+    $this->backdropGet('api/' . $this->branch_info['project'] . '/ClassA.php');
     $this->assertText('Namespace', 'Namespace header is on file page');
     $this->assertLink('api\\test1', 0, 'Namespace link is on file page');
     $this->clickLink('api\\test1');
     $this->assertLink('InterfaceD', 0, 'Link went back to namespace page');
 
     // Verify lack of namespace links on no-namespace files.
-    $this->drupalGet('api/' . $this->branch_info['project'] . '/no_namespace.php');
+    $this->backdropGet('api/' . $this->branch_info['project'] . '/no_namespace.php');
     $this->assertNoText('Namespace', 'Namespace header is not on non-namespaced file page');
     $this->assertNoLink('api\\test1', 'Namespace link is not on non-namespaced file page');
     $this->assertNoLink('api\\test2', 'Namespace link is not on non-namespaced file page');
@@ -103,12 +103,12 @@ class ApiNamespacesTestCase extends ApiWebPagesBaseTest {
     $this->assertNoLink('api\\test2', 'Namespace link is not on non-namespaced class page');
 
     // Test use references.
-    $this->drupalGet('api/' . $this->branch_info['project'] . '/ClassB.php/class/ClassB');
+    $this->backdropGet('api/' . $this->branch_info['project'] . '/ClassB.php/class/ClassB');
     $this->assertText('1 file declares its use of ClassB', 'Reference text is on class page');
     $this->assertLink('ClassA.php', 0, 'Link to file using class is present');
 
     // Verify trait page.
-    $this->drupalGet('api/' . $this->branch_info['project'] . '/TraitF.php/trait/TraitF');
+    $this->backdropGet('api/' . $this->branch_info['project'] . '/TraitF.php/trait/TraitF');
     $this->assertText('A sample trait.', 'Trait summary is there.');
     $this->assertText('Longer description of the trait', 'Trait description is there');
     $this->assertLink('api\test1', 0, 'Namespace link is present on trait page');
@@ -117,7 +117,7 @@ class ApiNamespacesTestCase extends ApiWebPagesBaseTest {
     $this->assertLink('ClassE.php', 0, 'Link to file using trait is present on trait page');
 
     // Verify page for class using trait.
-    $this->drupalGet('api/' . $this->branch_info['project'] . '/ClassE.php/class/ClassE');
+    $this->backdropGet('api/' . $this->branch_info['project'] . '/ClassE.php/class/ClassE');
     $this->assertLink('TraitF::$fvar', 0, 'Trait property link is present on using class page');
     $this->assertLink('TraitF::xyz', 0, 'Trait method link is present on using class page');
     $this->assertLink('TraitF', 0, 'Link to used trait is present on class page');
@@ -130,7 +130,7 @@ class ApiNamespacesTestCase extends ApiWebPagesBaseTest {
     $this->assertText('Method to inherit', 'Clicked through to method page');
 
     // Test traits with aliases.
-    $this->drupalGet('api/' . $this->branch_info['project'] . '/ClassA.php/class/ClassA');
+    $this->backdropGet('api/' . $this->branch_info['project'] . '/ClassA.php/class/ClassA');
     $this->assertLink('TraitF::$fvar', 0, 'Trait property link is present on using class page');
     $this->assertLink('TraitF::xyz', 0, 'Trait method link is present on using class page');
     $this->assertText('Aliased as: pdq', 'Trait alias text is present on using class page');
@@ -146,7 +146,7 @@ class ApiNamespacesTestCase extends ApiWebPagesBaseTest {
    * Tests that YAML works properly for linking and references.
    */
   function testYaml() {
-    $this->drupalGet('api/' . $this->branch_info['project'] . '/sample.routing.yml');
+    $this->backdropGet('api/' . $this->branch_info['project'] . '/sample.routing.yml');
 
     // Verify that the page name is correct.
     $this->assertTitleContains('sample.routing.yml', 'Page title is correct');
@@ -171,26 +171,26 @@ class ApiNamespacesTestCase extends ApiWebPagesBaseTest {
     $this->assertText("1 string reference to 'another_function'", 'Reference text is there');
     $this->assertLink('sample.routing.yml', 0, 'Referenced file is linked');
 
-    $this->drupalGet('api/' . $this->branch_info['project'] . '/sample.routing.yml');
+    $this->backdropGet('api/' . $this->branch_info['project'] . '/sample.routing.yml');
     $this->clickLink('\api\test1\ClassA::cMethod');
     $this->assertText("1 string reference to 'ClassA::cMethod'", 'Reference text is there');
     $this->assertLink('sample.routing.yml', 0, 'Referenced file is linked');
 
-    $this->drupalGet('api/' . $this->branch_info['project'] . '/sample.routing.yml');
+    $this->backdropGet('api/' . $this->branch_info['project'] . '/sample.routing.yml');
     $this->clickLink('\api\test1\ClassA::dMethod');
     $this->assertText("1 string reference to 'ClassA::dMethod'", 'Reference text is there');
     $this->assertLink('sample.routing.yml', 0, 'Referenced file is linked');
 
-    $this->drupalGet('api/' . $this->branch_info['project'] . '/sample.routing.yml');
+    $this->backdropGet('api/' . $this->branch_info['project'] . '/sample.routing.yml');
     $this->clickLink('api\test1\ClassA');
     $this->assertText("1 string reference to 'ClassA'", 'Reference text is there');
     $this->assertLink('sample.routing.yml', 0, 'Referenced file is linked');
 
     // Verify the links to the YML file.
-    $this->drupalGet('api/' . $this->branch_info['project'] . '/no_namespace.php/function/another_function');
+    $this->backdropGet('api/' . $this->branch_info['project'] . '/no_namespace.php/function/another_function');
     $this->assertLinkURLSubstring('user_register', $this->branch_info['project'] . '/sample.routing.yml', 'user_register link exists', 'user_register link went to the right place');
 
-    $this->drupalGet('api/' . $this->branch_info['project'] . '/no_namespace.php/class/ClassQ');
+    $this->backdropGet('api/' . $this->branch_info['project'] . '/no_namespace.php/class/ClassQ');
     $this->clickLink('ClassQ::bMethod');
     $this->assertLinkURLSubstring('sample.routing', $this->branch_info['project'] . '/sample.routing.yml', 'sample.routing link exists', 'sample.routing link went to the right place');
 
@@ -213,7 +213,7 @@ class ApiNamespaceCruftTestCase extends ApiWebPagesBaseTest {
     $this->baseSetUp();
 
     // Set up a new super-user.
-    $this->super_user = $this->drupalCreateUser(array(
+    $this->super_user = $this->backdropCreateUser(array(
       'access API reference',
       'administer API reference',
       'access content',
@@ -226,18 +226,18 @@ class ApiNamespaceCruftTestCase extends ApiWebPagesBaseTest {
       'skip comment approval',
     ));
 
-    $this->drupalLogin($this->super_user);
+    $this->backdropLogin($this->super_user);
 
     // Set up comment settings.
-    $this->drupalPost('admin/config/development/api/comments', array(
-        'comment' => 2,
-      ), t('Save comment settings'));
+    $this->backdropPost('admin/structure/types/manage/api', array(
+      'comment_default' => 2,
+    ), t('Save comment settings'));
 
     // We don't need the PHP branch for this test, so for speed, remove it.
     $this->removePHPBranch();
 
     // Add one node to the database.
-    $this->drupalCreateNode();
+    $this->backdropCreateNode();
   }
 
   /**
@@ -261,7 +261,7 @@ class ApiNamespaceCruftTestCase extends ApiWebPagesBaseTest {
     $this->verifyCounts($counts, 0, 'No branches');
 
     // Add a branch for the namespace test files.
-    $this->branch_info = $this->setUpBranchUI('', TRUE, array('directory' => drupal_get_path('module', 'api') . '/tests/sample_namespace', 'excluded' => ''));
+    $this->branch_info = $this->setUpBranchUI('', TRUE, array('directory' => backdrop_get_path('module', 'api') . '/tests/sample_namespace', 'excluded' => ''));
 
     $counts['api_project'] = 1;
     $counts['api_branch'] = 1;
@@ -291,7 +291,7 @@ class ApiNamespaceCruftTestCase extends ApiWebPagesBaseTest {
 
     // Delete the branch, and verify counts.
     $default_branch = api_get_branch_by_id();
-    $this->drupalPost('admin/config/development/api/branches/' . $default_branch->branch_id . '/delete', array(), t('Delete'));
+    $this->backdropPost('admin/config/development/api/branches/' . $default_branch->branch_id . '/delete', array(), t('Delete'));
     $this->resetBranchesAndCache();
     $counts['api_branch'] = 0;
     $counts['api_file'] = 0;
@@ -304,7 +304,7 @@ class ApiNamespaceCruftTestCase extends ApiWebPagesBaseTest {
     $this->verifyCounts($counts, 0, 'Branch deleted');
 
     // Delete the project and verify counts.
-    $this->drupalPost('admin/config/development/api/projects/' . $default_branch->project . '/delete', array(), t('Delete'));
+    $this->backdropPost('admin/config/development/api/projects/' . $default_branch->project . '/delete', array(), t('Delete'));
     $counts['api_project'] = 0;
     $this->verifyCounts($counts, 0, 'Project deleted');
   }

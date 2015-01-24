@@ -5,8 +5,8 @@
  * Generates and displays API documentation pages.
  *
  * This is an implementation of a subset of the Doxygen documentation generator
- * specification, tuned to produce output that best benefits the Drupal Codex
- * base. It is designed to assume the code it documents follows Drupal coding
+ * specification, tuned to produce output that best benefits the Backdrop Codex
+ * base. It is designed to assume the code it documents follows Backdrop coding
  * conventions, and supports documentation blocks in formats described on
  * http://drupal.org/node/1354
  */
@@ -101,11 +101,11 @@ function api_help($path, $arg) {
   switch ($path) {
     case 'admin/help#api':
       return t('
-<p>This is an implementation of a subset of the Doxygen documentation generator specification, tuned to produce output that best benefits the Drupal code base. It is designed to assume the code it documents follows Drupal coding conventions, and supports documentation blocks in formats described on !doxygen_link.</p>
+<p>This is an implementation of a subset of the Doxygen documentation generator specification, tuned to produce output that best benefits the Backdrop code base. It is designed to assume the code it documents follows Backdrop coding conventions, and supports documentation blocks in formats described on !doxygen_link.</p>
 
 <h3>Set up</h3>
 
-<p>Visit the !api_settings_page to configure the module. You must have the relevant Drupal code base on the same machine as the site hosting the API module. Set up Projects and Branches to index your Drupal code base.</p>
+<p>Visit the !api_settings_page to configure the module. You must have the relevant Backdrop code base on the same machine as the site hosting the API module. Set up Projects and Branches to index your Backdrop code base.</p>
 
 <p>Indexing of PHP functions is also supported, by setting up a PHP Reference Branch. If the site has internet access, then the default settings should work fine. For local development environments that have a PHP manual installed, you can edit the link path to point to the appropriate location.</p>
 
@@ -123,15 +123,15 @@ function api_help($path, $arg) {
 
     case 'admin/config/development/api/projects':
       return '<h3>' . t('Definitions:') . '</h3><ul>' .
-        '<li>' . t('Project: A module, theme, Drupal Core, or other group of files that the API module is parsing.') . '</li>' .
+        '<li>' . t('Project: A module, theme, Backdrop Core, or other group of files that the API module is parsing.') . '</li>' .
         '<li>' . t('Project type: Normally "core", "module", "theme", or "library". The type "core" is special: core project functions are given priority when turning function, class, and other names into links in code listings.') . '</li>' .
         '</ul>';
 
     case 'admin/config/development/api/branches':
       return '<h3>' . t('Definitions:') . '</h3><ul>' .
-        '<li>' . t('Project: A module, theme, Drupal Core, or other group of files that the API module is parsing. Set up on the Projects tab.') . '</li>' .
-        '<li>' . t('Branch: Within a Project, a particular version of the files (6.x-1.x, 7.x, 7.x-1.3, etc.).') . '</li>' .
-        '<li>' . t('Core compatibility: usually 7.x, 6.x, etc. Branches with matching core compatibility are used to make cross-project links, and the default project and core compatibility (set on the Overview tab) determines the default branch.') . '</li>' .
+        '<li>' . t('Project: A module, theme, Backdrop Core, or other group of files that the API module is parsing. Set up on the Projects tab.') . '</li>' .
+        '<li>' . t('Branch: Within a Project, a particular version of the files (1.x-1.x, 1.x, 2.x-1.3, etc.).') . '</li>' .
+        '<li>' . t('Core compatibility: usually 1.x, 2.x, etc. Branches with matching core compatibility are used to make cross-project links, and the default project and core compatibility (set on the Overview tab) determines the default branch.') . '</li>' .
         '<li>' . t('Reparse: Force a parse of every file in the branch, starting next time the branch is updated.') . '</li>' .
         '<li>' . t('Update: Force a scan of the file directories in the branch for updated and removed files. This normally happens during cron runs after a minimum time (set on branch edit page) has passed.') . '</li>' .
         '</ul>';
@@ -139,7 +139,7 @@ function api_help($path, $arg) {
     case 'admin/config/development/api/php_branches':
       return '<h3>' . t('Definitions:') . '</h3><ul>' .
         '<li>' . t('PHP reference branch: Queries an external PHP web site, such as php.net, for its function list, in order to make links to these functions.') . '</li>' .
-        '<li>' . t('API reference branch: Queries an external web site running the API module, such as api.drupal.org, in order to make links to Drupal API classes, functions, etc.') . '</li>' .
+        '<li>' . t('API reference branch: Queries an external web site running the API module, such as api.drupal.org, in order to make links to Backdrop API classes, functions, etc.') . '</li>' .
         '<li>' . t('Update: Force a scan of the selected branch. This normally happens during cron runs after a minimum time (set on branch edit page) has passed.') . '</li>' .
         '</ul>';
   }
@@ -173,7 +173,7 @@ function api_menu() {
     'title' => 'Reset parse queue',
     'access callback' => 'user_access',
     'access arguments' => array('administer API reference'),
-    'page callback' => 'drupal_get_form',
+    'page callback' => 'backdrop_get_form',
     'page arguments' => array('api_reset_queue_form'),
     'file' => 'api.admin.inc',
     'type' => MENU_CALLBACK,
@@ -198,19 +198,19 @@ function api_menu() {
   );
 
   $items['admin/config/development/api/projects/new'] = array(
-    'title' => 'New project',
+    'title' => 'Add new project',
     'access callback' => 'user_access',
     'access arguments' => array('administer API reference'),
-    'page callback' => 'drupal_get_form',
+    'page callback' => 'backdrop_get_form',
     'page arguments' => array('api_project_edit_form'),
     'file' => 'api.admin.inc',
-    'type' => MENU_CALLBACK,
+    'type' => MENU_LOCAL_ACTION,
   );
   $items['admin/config/development/api/projects/%'] = array(
     'title' => 'Edit project',
     'access callback' => 'user_access',
     'access arguments' => array('administer API reference'),
-    'page callback' => 'drupal_get_form',
+    'page callback' => 'backdrop_get_form',
     'page arguments' => array('api_project_edit_form', 5),
     'file' => 'api.admin.inc',
     'type' => MENU_CALLBACK,
@@ -219,7 +219,7 @@ function api_menu() {
   $items['admin/config/development/api/projects/%/delete'] = array(
     'access callback' => 'user_access',
     'access arguments' => array('administer API reference'),
-    'page callback' => 'drupal_get_form',
+    'page callback' => 'backdrop_get_form',
     'page arguments' => array('api_project_delete_form', 5),
     'file' => 'api.admin.inc',
     'type' => MENU_CALLBACK,
@@ -243,20 +243,20 @@ function api_menu() {
   );
 
   $items['admin/config/development/api/branches/new'] = array(
-    'title' => 'New branch',
+    'title' => 'Add new branch',
     'access callback' => 'user_access',
     'access arguments' => array('administer API reference'),
-    'page callback' => 'drupal_get_form',
+    'page callback' => 'backdrop_get_form',
     'page arguments' => array('api_branch_edit_form'),
     'file' => 'api.admin.inc',
-    'type' => MENU_CALLBACK,
+    'type' => MENU_LOCAL_ACTION,
   );
 
   $items['admin/config/development/api/branches/%'] = array(
     'title' => 'Edit branch',
     'access callback' => 'user_access',
     'access arguments' => array('administer API reference'),
-    'page callback' => 'drupal_get_form',
+    'page callback' => 'backdrop_get_form',
     'page arguments' => array('api_branch_edit_form', 5),
     'file' => 'api.admin.inc',
     'type' => MENU_CALLBACK,
@@ -285,7 +285,7 @@ function api_menu() {
   $items['admin/config/development/api/branches/%/delete'] = array(
     'access callback' => 'user_access',
     'access arguments' => array('administer API reference'),
-    'page callback' => 'drupal_get_form',
+    'page callback' => 'backdrop_get_form',
     'page arguments' => array('api_branch_delete_form', 5),
     'file' => 'api.admin.inc',
     'type' => MENU_CALLBACK,
@@ -303,30 +303,30 @@ function api_menu() {
   );
 
   $items['admin/config/development/api/php_branches/new'] = array(
-    'title' => 'New PHP reference branch',
+    'title' => 'Add new PHP reference branch',
     'access callback' => 'user_access',
     'access arguments' => array('administer API reference'),
-    'page callback' => 'drupal_get_form',
+    'page callback' => 'backdrop_get_form',
     'page arguments' => array('api_php_branch_edit_form'),
     'file' => 'api.admin.inc',
-    'type' => MENU_CALLBACK,
+    'type' => MENU_LOCAL_ACTION,
   );
 
   $items['admin/config/development/api/php_branches/new_api'] = array(
-    'title' => 'New API reference branch',
+    'title' => 'Add new API reference branch',
     'access callback' => 'user_access',
     'access arguments' => array('administer API reference'),
-    'page callback' => 'drupal_get_form',
+    'page callback' => 'backdrop_get_form',
     'page arguments' => array('api_api_branch_edit_form'),
     'file' => 'api.admin.inc',
-    'type' => MENU_CALLBACK,
+    'type' => MENU_LOCAL_ACTION,
   );
 
   $items['admin/config/development/api/php_branches/%'] = array(
     'title' => 'Edit PHP reference branch',
     'access callback' => 'user_access',
     'access arguments' => array('administer API reference'),
-    'page callback' => 'drupal_get_form',
+    'page callback' => 'backdrop_get_form',
     'page arguments' => array('api_php_branch_edit_form', 5),
     'file' => 'api.admin.inc',
     'type' => MENU_CALLBACK,
@@ -336,7 +336,7 @@ function api_menu() {
     'title' => 'Edit API reference branch',
     'access callback' => 'user_access',
     'access arguments' => array('administer API reference'),
-    'page callback' => 'drupal_get_form',
+    'page callback' => 'backdrop_get_form',
     'page arguments' => array('api_api_branch_edit_form', 5),
     'file' => 'api.admin.inc',
     'type' => MENU_CALLBACK,
@@ -345,7 +345,7 @@ function api_menu() {
   $items['admin/config/development/api/php_branches/%/delete'] = array(
     'access callback' => 'user_access',
     'access arguments' => array('administer API reference'),
-    'page callback' => 'drupal_get_form',
+    'page callback' => 'backdrop_get_form',
     'page arguments' => array('api_php_branch_delete_form', 5),
     'file' => 'api.admin.inc',
     'type' => MENU_CALLBACK,
@@ -360,27 +360,6 @@ function api_menu() {
     'file' => 'api.admin.inc',
     'type' => MENU_CALLBACK,
   );
-
-  // Comment admin.
-  if (module_exists('comment')) {
-    $items['admin/config/development/api/comments'] = array(
-      'title' => 'Comment settings',
-      'access arguments' => array('administer API reference'),
-      'page callback' => 'drupal_get_form',
-      'page arguments' => array('api_comments_settings_form'),
-      'file' => 'api.admin.inc',
-      'type' => MENU_LOCAL_TASK,
-      'weight' => 20,
-    );
-
-    $items['admin/config/development/api/comments/apply'] = array(
-      'title' => 'Apply comment settings',
-      'access arguments' => array('administer API reference'),
-      'page callback' => 'api_apply_comment_settings',
-      'file' => 'api.admin.inc',
-      'type' => MENU_CALLBACK,
-    );
-  }
 
   // Projects autocomplete callback. This is always available.
   $items['api/project/autocomplete'] = array(
@@ -403,7 +382,7 @@ function api_menu() {
 
   // Legacy search URLs.
   $items['api/search'] = array(
-    'page callback' => 'drupal_goto',
+    'page callback' => 'backdrop_goto',
     'page arguments' => array('api/' . $default_branch->project . '/' . $default_branch->branch_name . '/search', array(), '302'),
     'access arguments' => array('access API reference'),
     'type' => MENU_CALLBACK,
@@ -783,7 +762,7 @@ function api_menu() {
     // Branch search page.
     $items['api/' . $branch->project . '/' . $branch->branch_name . '/search'] = array(
       'title' => $branch->title,
-      'page callback' => 'drupal_get_form',
+      'page callback' => 'backdrop_get_form',
       'page arguments' => array('api_search_form', $branch),
       'access arguments' => array('access API reference'),
       'type' => MENU_NORMAL_ITEM,
@@ -975,7 +954,7 @@ function api_menu() {
     // Dump of all documentation items in the branch.
     // Note that you can put query parameters on this URL: 'limit' to limit
     // the number of items output, and 'page' to move on to the next page if
-    // limit is set (page numbering starts at 0 just like the standard Drupal
+    // limit is set (page numbering starts at 0 just like the standard Backdrop
     // pager). Query params are optional.
     if ($is_default) {
       $items['api/' . $branch->project . '/full_list'] = array(
@@ -1012,7 +991,7 @@ function api_menu() {
   // Objects
   $items['api/function/%api_legacy_1_2_object'] = array(
     'load arguments' => array('function', 3),
-    'page callback' => 'drupal_goto',
+    'page callback' => 'backdrop_goto',
     'page arguments' => array(2, array(), '302'),
     'access callback' => TRUE,
     'type' => MENU_CALLBACK,
@@ -1022,7 +1001,7 @@ function api_menu() {
 
   $items['api/constant/%api_legacy_1_2_object'] = array(
     'load arguments' => array('constant', 3),
-    'page callback' => 'drupal_goto',
+    'page callback' => 'backdrop_goto',
     'page arguments' => array(2, array(), '302'),
     'access callback' => TRUE,
     'type' => MENU_CALLBACK,
@@ -1032,7 +1011,7 @@ function api_menu() {
 
   $items['api/global/%api_legacy_1_2_object'] = array(
     'load arguments' => array('global', 3),
-    'page callback' => 'drupal_goto',
+    'page callback' => 'backdrop_goto',
     'page arguments' => array(2, array(), '302'),
     'access callback' => TRUE,
     'type' => MENU_CALLBACK,
@@ -1042,7 +1021,7 @@ function api_menu() {
 
   $items['api/group/%api_legacy_1_2_object'] = array(
     'load arguments' => array('group', 3),
-    'page callback' => 'drupal_goto',
+    'page callback' => 'backdrop_goto',
     'page arguments' => array(2, array(), '302'),
     'access callback' => TRUE,
     'type' => MENU_CALLBACK,
@@ -1051,37 +1030,37 @@ function api_menu() {
 
   // Default listings
   $items['api/functions'] = array(
-    'page callback' => 'drupal_goto',
+    'page callback' => 'backdrop_goto',
     'page arguments' => array('api/' . $default_branch->project . '/functions', array(), '302'),
     'access callback' => TRUE,
     'type' => MENU_CALLBACK,
   );
   $items['api/files'] = array(
-    'page callback' => 'drupal_goto',
+    'page callback' => 'backdrop_goto',
     'page arguments' => array('api/' . $default_branch->project . '/files', array(), '302'),
     'access callback' => TRUE,
     'type' => MENU_CALLBACK,
   );
   $items['api/constants'] = array(
-    'page callback' => 'drupal_goto',
+    'page callback' => 'backdrop_goto',
     'page arguments' => array('api/' . $default_branch->project . '/constants', array(), '302'),
     'access callback' => TRUE,
     'type' => MENU_CALLBACK,
   );
   $items['api/globals'] = array(
-    'page callback' => 'drupal_goto',
+    'page callback' => 'backdrop_goto',
     'page arguments' => array('api/' . $default_branch->project . '/globals', array(), '302'),
     'access callback' => TRUE,
     'type' => MENU_CALLBACK,
   );
   $items['api/groups'] = array(
-    'page callback' => 'drupal_goto',
+    'page callback' => 'backdrop_goto',
     'page arguments' => array('api/' . $default_branch->project . '/groups', array(), '302'),
     'access callback' => TRUE,
     'type' => MENU_CALLBACK,
   );
   $items['api'] = array(
-    'page callback' => 'drupal_goto',
+    'page callback' => 'backdrop_goto',
     'page arguments' => array('api/' . $default_branch->project, array(), '302'),
     'access callback' => TRUE,
     'type' => MENU_CALLBACK,
@@ -1089,41 +1068,41 @@ function api_menu() {
   // Branch listings
   $items['api/functions/%api_legacy_1_2_listing'] = array(
     'load arguments' => array('functions'),
-    'page callback' => 'drupal_goto',
+    'page callback' => 'backdrop_goto',
     'page arguments' => array(2, array(), '302'),
     'access callback' => TRUE,
     'type' => MENU_CALLBACK,
   );
   $items['api/files/%api_legacy_1_2_listing'] = array(
     'load arguments' => array('files'),
-    'page callback' => 'drupal_goto',
+    'page callback' => 'backdrop_goto',
     'page arguments' => array(2, array(), '302'),
     'access callback' => TRUE,
     'type' => MENU_CALLBACK,
   );
   $items['api/constants/%api_legacy_1_2_listing'] = array(
     'load arguments' => array('constants'),
-    'page callback' => 'drupal_goto',
+    'page callback' => 'backdrop_goto',
     'page arguments' => array(2, array(), '302'),
     'access callback' => TRUE,
     'type' => MENU_CALLBACK,
   );
   $items['api/globals/%api_legacy_1_2_listing'] = array(
     'load arguments' => array('globals'),
-    'page callback' => 'drupal_goto',
+    'page callback' => 'backdrop_goto',
     'page arguments' => array(2, array(), '302'),
     'access callback' => TRUE,
     'type' => MENU_CALLBACK,
   );
   $items['api/groups/%api_legacy_1_2_listing'] = array(
     'load arguments' => array('groups'),
-    'page callback' => 'drupal_goto',
+    'page callback' => 'backdrop_goto',
     'page arguments' => array(2, array(), '302'),
     'access callback' => TRUE,
     'type' => MENU_CALLBACK,
   );
   $items['api/%api_legacy_1_2_listing'] = array(
-    'page callback' => 'drupal_goto',
+    'page callback' => 'backdrop_goto',
     'page arguments' => array(1, array(), '302'),
     'access callback' => TRUE,
     'type' => MENU_CALLBACK,
@@ -1153,7 +1132,7 @@ function _api_make_menu_projects() {
     return array();
   }
 
-  $compatibility = variable_get('api_default_core_compatibility', '');
+  $compatibility = config_get('api.settings', 'default_core_compatibility');
   $projects = array();
 
   foreach ($branches as $branch) {
@@ -1261,7 +1240,7 @@ function api_legacy_1_2_listing_load($branch_name, $type = NULL) {
  *
  * @return
  *   Loaded documentation object, or FALSE if not found (returning FALSE will
- *   cause the Drupal menu system to recognize it's a 404 error).
+ *   cause the Backdrop menu system to recognize it's a 404 error).
  */
 function api_item_load($object_name, $project, $branch_name, $file_name, $type) {
   // Check type
@@ -1285,7 +1264,7 @@ function api_item_load($object_name, $project, $branch_name, $file_name, $type) 
     $doc_object = api_object_load($object_name, $branch, $type, str_replace(API_v1_3_FILEPATH_SEPARATOR_REPLACEMENT, API_FILEPATH_SEPARATOR, $file_name) );
     // If we could, redirect to the current URL.
     if (!empty($doc_object)) {
-      drupal_goto(api_url($doc_object));
+      backdrop_goto(api_url($doc_object));
     }
   }
 
@@ -1317,7 +1296,7 @@ function api_item_load($object_name, $project, $branch_name, $file_name, $type) 
  *
  * @return
  *   Loaded documentation object, or FALSE if not found (returning FALSE will
- *   cause the Drupal menu system to recognize it's a 404 error).
+ *   cause the Backdrop menu system to recognize it's a 404 error).
  */
 function api_filename_load($file_name, $project, $branch_name) {
   $branch = api_get_branch_by_name($project, $branch_name);
@@ -1333,7 +1312,7 @@ function api_filename_load($file_name, $project, $branch_name) {
     $doc_object = api_object_load(str_replace(API_v1_3_FILEPATH_SEPARATOR_REPLACEMENT, API_FILEPATH_SEPARATOR, $file_name), $branch, 'file');
     // If we could, redirect to the current URL.
     if (!empty($doc_object)) {
-      drupal_goto(api_url($doc_object));
+      backdrop_goto(api_url($doc_object));
     }
   }
 
@@ -1464,7 +1443,7 @@ function api_theme() {
         'branch' => NULL,
         'object' => NULL,
       ),
-      'path' => drupal_get_path('module', 'api') . '/templates',
+      'path' => backdrop_get_path('module', 'api') . '/templates',
       'template' => 'api-defined',
       'file' => 'api.theme.inc',
       'preprocess functions' => array('template_preprocess', 'api_preprocess_api_defined'),
@@ -1473,7 +1452,7 @@ function api_theme() {
       'variables' => array(
         'functions' => array(),
       ),
-      'path' => drupal_get_path('module', 'api') . '/templates',
+      'path' => backdrop_get_path('module', 'api') . '/templates',
       'template' => 'api-functions',
     ),
     'api_function_page' => array(
@@ -1493,7 +1472,7 @@ function api_theme() {
         'class' => NULL,
       ),
       'preprocess functions' => array('template_preprocess', 'api_preprocess_api_object_page'),
-      'path' => drupal_get_path('module', 'api') . '/templates',
+      'path' => backdrop_get_path('module', 'api') . '/templates',
       'template' => 'api-function-page',
       'file' => 'api.theme.inc',
     ),
@@ -1510,7 +1489,7 @@ function api_theme() {
         'call_links' => array(),
       ),
       'preprocess functions' => array('template_preprocess', 'api_preprocess_api_object_page'),
-      'path' => drupal_get_path('module', 'api') . '/templates',
+      'path' => backdrop_get_path('module', 'api') . '/templates',
       'template' => 'api-constant-page',
       'file' => 'api.theme.inc',
     ),
@@ -1525,7 +1504,7 @@ function api_theme() {
         'deprecated' => NULL,
       ),
       'preprocess functions' => array('template_preprocess', 'api_preprocess_api_object_page'),
-      'path' => drupal_get_path('module', 'api') . '/templates',
+      'path' => backdrop_get_path('module', 'api') . '/templates',
       'template' => 'api-global-page',
       'file' => 'api.theme.inc',
     ),
@@ -1542,7 +1521,7 @@ function api_theme() {
         'class' => NULL,
       ),
       'preprocess functions' => array('template_preprocess', 'api_preprocess_api_object_page'),
-      'path' => drupal_get_path('module', 'api') . '/templates',
+      'path' => backdrop_get_path('module', 'api') . '/templates',
       'template' => 'api-property-page',
       'file' => 'api.theme.inc',
     ),
@@ -1561,7 +1540,7 @@ function api_theme() {
         'call_links' => array(),
       ),
       'preprocess functions' => array('template_preprocess', 'api_preprocess_api_object_page'),
-      'path' => drupal_get_path('module', 'api') . '/templates',
+      'path' => backdrop_get_path('module', 'api') . '/templates',
       'template' => 'api-class-page',
       'file' => 'api.theme.inc',
     ),
@@ -1575,7 +1554,7 @@ function api_theme() {
         'call_links' => array(),
       ),
       'preprocess functions' => array('template_preprocess', 'api_preprocess_api_object_page'),
-      'path' => drupal_get_path('module', 'api') . '/templates',
+      'path' => backdrop_get_path('module', 'api') . '/templates',
       'template' => 'api-service-page',
       'file' => 'api.theme.inc',
     ),
@@ -1592,7 +1571,7 @@ function api_theme() {
         'call_links' => array(),
       ),
       'preprocess functions' => array('template_preprocess', 'api_preprocess_api_object_page'),
-      'path' => drupal_get_path('module', 'api') . '/templates',
+      'path' => backdrop_get_path('module', 'api') . '/templates',
       'template' => 'api-file-page',
       'file' => 'api.theme.inc',
     ),
@@ -1606,7 +1585,7 @@ function api_theme() {
         'related_topics' => NULL,
       ),
       'preprocess functions' => array('template_preprocess', 'api_preprocess_api_object_page'),
-      'path' => drupal_get_path('module', 'api') . '/templates',
+      'path' => backdrop_get_path('module', 'api') . '/templates',
       'template' => 'api-group-page',
       'file' => 'api.theme.inc',
     ),
@@ -1614,7 +1593,7 @@ function api_theme() {
       'variables' => array(
         'branch' => NULL,
       ),
-      'path' => drupal_get_path('module', 'api') . '/templates',
+      'path' => backdrop_get_path('module', 'api') . '/templates',
       'template' => 'api-branch-default-page',
     ),
     'api_function_reference_link' => array(
@@ -1624,7 +1603,7 @@ function api_theme() {
         'function' => (object) array(),
         'override_text' => '',
       ),
-      'path' => drupal_get_path('module', 'api') . '/templates',
+      'path' => backdrop_get_path('module', 'api') . '/templates',
       'file' => 'api.theme.inc',
     ),
     'api_class_section' => array(
@@ -1632,7 +1611,7 @@ function api_theme() {
         'class' => NULL,
         'branch' => NULL,
       ),
-      'path' => drupal_get_path('module', 'api') . '/templates',
+      'path' => backdrop_get_path('module', 'api') . '/templates',
       'template' => 'api-class-section',
       'file' => 'api.theme.inc',
       'preprocess functions' => array('template_preprocess', 'api_preprocess_api_class_section'),
@@ -1641,7 +1620,7 @@ function api_theme() {
       'variables' => array(
       ),
       'template' => 'api-views-view-dl-list',
-      'path' => drupal_get_path('module', 'api') . '/templates',
+      'path' => backdrop_get_path('module', 'api') . '/templates',
       'file' => 'api.theme.inc',
       'preprocess functions' => array('template_preprocess', 'api_preprocess_views_view_dl_list'),
     ),
@@ -1698,14 +1677,14 @@ function api_init() {
       ->range(0, 1)
       ->execute()
       ->fetchObject();
-    drupal_goto(api_url($result));
+    backdrop_goto(api_url($result));
   }
 
   // Add OpenSearch autodiscovery link.
-  $title = variable_get('api_opensearch_name', t('Drupal API'));
+  $title = config_get('api.settings', 'opensearch_name');
   $url = url('api/opensearch', array('absolute' => TRUE));
   $weight = 100;
-  drupal_add_html_head(array(
+  backdrop_add_html_head(array(
       '#tag' => 'link',
       '#weight' => $weight,
       '#attributes' => array(
@@ -1715,6 +1694,16 @@ function api_init() {
         'type' => 'application/opensearchdescription+xml',
       ),
     ), $title);
+}
+
+/**
+ * Implements hook_node_access().
+ */
+function api_node_access($node, $op, $account) {
+  // Do not allow creation, edit, or delete of API nodes through the UI.
+  if (($node === 'api' || $node->type === 'api') && $op !== 'view') {
+    return FALSE;
+  }
 }
 
 /**
@@ -1787,7 +1776,7 @@ function api_block_view($delta) {
       if (user_access('access API reference') && !empty($branch)) {
         return array(
           'subject' => t('Search @branch', array('@branch' => $branch->title)),
-          'content' => drupal_get_form('api_search_form', $branch),
+          'content' => backdrop_get_form('api_search_form', $branch),
         );
       }
       return;
@@ -1994,18 +1983,6 @@ function api_filter_documentation_process($text) {
 }
 
 /**
- * Implements hook_forms().
- *
- * Since the 'api' content type is hidden, do what comment_forms() does so
- * that the comment form will work.
- */
-function api_forms() {
-  $forms = array();
-  $forms['comment_node_api_form']['callback'] = 'comment_form';
-  return $forms;
-}
-
-/**
  * Constructs a link to an API object page.
  *
  * Constructs a URL for an object, replacing any API_FILEPATH_SEPARATOR in a
@@ -2081,10 +2058,10 @@ function api_save_branch($branch) {
   $branch->last_updated = 0;
 
   if (empty($branch->branch_id)) {
-    drupal_write_record('api_branch', $branch);
+    backdrop_write_record('api_branch', $branch);
   }
   else {
-    drupal_write_record('api_branch', $branch, 'branch_id');
+    backdrop_write_record('api_branch', $branch, 'branch_id');
 
     // We've just updated a files branch, so we need to mark all of the files
     // that were in the parse queue so that they are re-queued next time
@@ -2144,17 +2121,17 @@ function api_delete_branch($branch_id, $finalize = TRUE) {
 function api_save_php_branch($branch) {
   // If core compatibility has not yet been set and we've just added an
   // API reference branch, set it now.
-  $version = variable_get('api_default_core_compatibility', NULL);
+  $version = config_get('api.settings', 'default_core_compatibility');
   if (!$version && isset($branch->data['core_compatibility'])) {
-    variable_set('api_default_core_compatibility', $branch->data['core_compatibility']);
+    config_set('api.settings', 'default_core_compatibility', $branch->data['core_compatibility']);
   }
 
   $branch->data = serialize($branch->data);
   if (empty($branch->branch_id)) {
-    drupal_write_record('api_php_branch', $branch);
+    backdrop_write_record('api_php_branch', $branch);
   }
   else {
-    drupal_write_record('api_php_branch', $branch, 'branch_id');
+    backdrop_write_record('api_php_branch', $branch, 'branch_id');
   }
 
   api_get_php_branches(TRUE);
@@ -2198,7 +2175,7 @@ function api_save_project($project, $old_name = '') {
   db_delete('api_project')
     ->condition('project_name', $old_name)
     ->execute();
-  drupal_write_record('api_project', $project);
+  backdrop_write_record('api_project', $project);
 
   if ($old_name != $project->project_name) {
     // Update existing branches to the new name.
@@ -2209,9 +2186,9 @@ function api_save_project($project, $old_name = '') {
   }
 
   // See if our current default project is valid, and reset if not.
-  $default = variable_get('api_default_project', '');
+  $default = config_get('api.settings', 'default_project');
   if (!api_project_exists($default)) {
-    variable_set('api_default_project', $project->project_name);
+    config_set('api.settings', 'default_project', $project->project_name);
   }
 
   api_reset_branches();
@@ -2266,15 +2243,15 @@ function api_project_exists($project_name) {
  */
 function api_reset_branches() {
   // Recalculate the default branch.
-  $project = variable_get('api_default_project', '');
-  $version = variable_get('api_default_core_compatibility', '');
+  $project = config_get('api.settings', 'default_project');
+  $version = config_get('api.settings', 'default_core_compatibility');
   $branches = api_get_branches(TRUE);
-  $default_id = variable_get('api_default_branch', -99);
+  $default_id = config_get('api.settings', 'default_branch');
   $values_set = FALSE;
   foreach ($branches as $branch) {
     if (($branch->project == $project) && $branch->preferred && ($branch->core_compatibility == $version) && ($default_id != $branch->branch_id)) {
       $values_set = TRUE;
-      variable_set('api_default_branch', $branch->branch_id);
+      config_set('api.settings', 'default_branch', $branch->branch_id);
       break;
     }
   }
@@ -2282,7 +2259,7 @@ function api_reset_branches() {
   $branches = api_get_branches(TRUE);
 
   // Make sure the default branch variable is set to something.
-  $default_id = variable_get('api_default_branch', NULL);
+  $default_id = config_get('api.settings', 'default_branch');
   $default_branch = api_get_branch_by_id($default_id);
   if (!$default_branch && count($branches) > 0) {
     $default_branch = reset($branches);
@@ -2290,26 +2267,26 @@ function api_reset_branches() {
 
   if (isset($default_branch) && (!$default_id || ($default_branch->branch_id != $default_id))) {
     $values_set = TRUE;
-    variable_set('api_default_branch', $default_branch->branch_id);
+    config_set('api.settings', 'default_branch', $default_branch->branch_id);
   }
 
   // Make sure the default project and core compatibility are set to agree
   // with the default branch.
   if ($default_branch && (!$project || ($project != $default_branch->project))) {
     $values_set = TRUE;
-    variable_set('api_default_project', $default_branch->project);
+    config_set('api.settings', 'default_project', $default_branch->project);
   }
   if ($default_branch && (!$version || ($version != $default_branch->core_compatibility))) {
     $values_set = TRUE;
-    variable_set('api_default_core_compatibility', $default_branch->core_compatibility);
+    config_set('api.settings', 'default_core_compatibility', $default_branch->core_compatibility);
   }
 
   if ($values_set) {
-    drupal_set_message(t('Default branch, project, and/or core compatibility values were reset to stay consistent'));
+    backdrop_set_message(t('Default branch, project, and/or core compatibility values were reset to stay consistent'));
   }
 
   // Reset the branch lists.
-  drupal_static_reset('api_get_branch_names');
+  backdrop_static_reset('api_get_branch_names');
   $branches = api_get_branches(TRUE);
 
   // Reweight all branches.
@@ -2318,12 +2295,12 @@ function api_reset_branches() {
   foreach ($branches as $branch) {
     $branch->weight = $weight;
     $weight += 1;
-    drupal_write_record('api_branch', $branch, 'branch_id');
+    backdrop_write_record('api_branch', $branch, 'branch_id');
   }
-  drupal_static_reset('api_get_branches');
+  backdrop_static_reset('api_get_branches');
 
   // Tell the menu system it needs rebuilding.
-  variable_set('menu_rebuild_needed', TRUE);
+  state_set('menu_rebuild_needed', TRUE);
 }
 
 /**
@@ -2334,7 +2311,7 @@ function api_reset_branches() {
 function api_branch_sort($a, $b) {
   // Sort by project.
   if ($a->project != $b->project) {
-    $default_project = variable_get('api_default_project', '');
+    $default_project = config_get('api.settings', 'default_project');
     // If one of a or b is in the default project and the other isn't, that
     // one is preferred.
     if ($a->project == $default_project) {
@@ -2358,7 +2335,7 @@ function api_branch_sort($a, $b) {
 
   // Sort by core compatibility.
   if ($a->core_compatibility != $b->core_compatibility) {
-    $default_version = variable_get('api_default_core_compatibility', '');
+    $default_version = config_get('api.settings', 'default_core_compatibility');
 
     // If one of a or b is in the default compatibility and the other isn't,
     // that one is preferred.
@@ -2407,7 +2384,7 @@ function api_branch_sort($a, $b) {
  */
 function api_delete_items($dids, $interactive = TRUE) {
   // Count the cumulative effect of calls in this page request.
-  $total_count = &drupal_static(__FUNCTION__, 0);
+  $total_count = &backdrop_static(__FUNCTION__, 0);
 
   // If there's nothing to do, return early.
   $count = count($dids);
@@ -2522,7 +2499,7 @@ function api_delete_items($dids, $interactive = TRUE) {
     batch_set(array('operations' => array(array('_api_delete_nodes_batch', array($dids)))));
   }
   else {
-    $queue = DrupalQueue::get('api_node_delete');
+    $queue = BackdropQueue::get('api_node_delete');
     $done = 0;
     while ($done < $count) {
       $this_batch = array_slice($dids, $done, 100);
@@ -2573,7 +2550,7 @@ function api_get_active_branch() {
       return NULL;
     }
     $branch_names = api_get_branch_names();
-    $default_branch = variable_get('api_default_branch', NULL);
+    $default_branch = config_get('api.settings', 'default_branch');
 
     // See if we are on an API page and get the active branch from that.
     // If we are not on an API page, calling menu_get_item() here could lead
@@ -2644,7 +2621,7 @@ function api_get_active_branch() {
  *   Array of branch objects, in order by branch weight.
  */
 function api_get_branches($_reset = FALSE) {
-  $branches = &drupal_static(__FUNCTION__);
+  $branches = &backdrop_static(__FUNCTION__);
 
   if (!isset($branches) || $_reset) {
     $query = db_select('api_branch', 'b')
@@ -2668,7 +2645,7 @@ function api_get_branches($_reset = FALSE) {
  * Unpacks and adds defaults to branch data.
  */
 function api_unpack_branch_data($branch) {
-  drupal_unpack($branch);
+  backdrop_unpack($branch);
   if (!isset($branch->directories)) {
     $branch->directories = '';
   }
@@ -2693,7 +2670,7 @@ function api_unpack_branch_data($branch) {
 function api_get_branch_by_id($id = NULL) {
   $branches = api_get_branches();
   if (!isset($id)) {
-    $id = variable_get('api_default_branch', NULL);
+    $id = config_get('api.settings', 'default_branch');
   }
   if (isset($id) && isset($branches[$id])) {
     return $branches[$id];
@@ -2744,14 +2721,14 @@ function api_find_core_branch($branch) {
  *   Array of branch names in use.
  */
 function api_get_branch_names($_reset = FALSE) {
-  $branch_names = &drupal_static(__FUNCTION__);
+  $branch_names = &backdrop_static(__FUNCTION__);
 
   if (!isset($branch_names) || $_reset) {
     $result = db_select('api_branch', 'b')
       ->fields('b', array('branch_name'))
       ->execute()
       ->fetchCol();
-    $branch_names = drupal_map_assoc($result);
+    $branch_names = backdrop_map_assoc($result);
   }
 
   return $branch_names;
@@ -2767,7 +2744,7 @@ function api_get_branch_names($_reset = FALSE) {
  *   Array of reference branch objects, in order by title.
  */
 function api_get_php_branches($_reset = FALSE) {
-  $branches = drupal_static(__FUNCTION__);
+  $branches = backdrop_static(__FUNCTION__);
 
   if (!isset($branches) || $_reset) {
     $result = db_select('api_php_branch', 'b')
@@ -2889,7 +2866,7 @@ function api_search_form_submit($form, &$form_state) {
 function api_cron() {
   // Do not do cron unless there is at least one branch, or if the
   // API admin page has been visited at least once.
-  $doit = variable_get('api_do_cron', 0);
+  $doit = state_get('api_do_cron', 0);
   if (!$doit) {
     $doit = (count(api_get_branches()) > 0);
   }
@@ -3131,7 +3108,7 @@ function api_queue_node_delete($data) {
  * status.
  */
 function api_reset_parse_queue() {
-  $queue = DrupalQueue::get('api_parse');
+  $queue = BackdropQueue::get('api_parse');
   $queue->deleteQueue();
 
   db_update('api_file')
@@ -3156,21 +3133,18 @@ function api_libraries_loaded($watchdog = TRUE) {
     return $loaded;
   }
 
-  if (!gplib_version_check(FALSE)) {
-    if ($watchdog) {
-      watchdog('api', 'Grammar Parser library is not installed or version is incompatible.', array(), WATCHDOG_ERROR);
-    }
-    $loaded = FALSE;
-    return FALSE;
-  }
-
-  $library = libraries_load('grammar_parser');
-  if (empty($library['loaded'])) {
-    if ($watchdog) {
-      watchdog('api', 'Grammar Parser library is not loaded. Unable to parse files.', array(), WATCHDOG_ERROR);
-    }
-    $loaded = FALSE;
-    return FALSE;
+  // The Drupal 7 version of this module depends on Libraries API. As Backdrop
+  // does not yet have a Libraries API and the chances of conflicts of this
+  // library are low (shared only between API and Coder), the library is
+  // included directly.
+  if (!class_exists('PGPParser')) {
+    $path = backdrop_get_path('module', 'api');
+    include_once BACKDROP_ROOT . '/' . $path . '/grammar_parser/parser.inc';
+    include_once BACKDROP_ROOT . '/' . $path . '/grammar_parser/editor.inc';
+    include_once BACKDROP_ROOT . '/' . $path . '/grammar_parser/list.inc';
+    include_once BACKDROP_ROOT . '/' . $path . '/grammar_parser/object.inc';
+    include_once BACKDROP_ROOT . '/' . $path . '/grammar_parser/reader.inc';
+    include_once BACKDROP_ROOT . '/' . $path . '/grammar_parser/writer.inc';
   }
 
   if (!function_exists('mb_check_encoding')) {
@@ -3180,6 +3154,8 @@ function api_libraries_loaded($watchdog = TRUE) {
     $loaded = FALSE;
     return FALSE;
   }
+
+  return TRUE;
 
   $version = explode('.', PHP_VERSION);
   if ($version[0] < 5 || $version[1] < 4) {
@@ -3212,7 +3188,7 @@ function api_project_autocomplete($string = '') {
     }
   }
 
-  drupal_json_output($matches);
+  backdrop_json_output($matches);
 }
 
 /**
@@ -3235,7 +3211,7 @@ function api_search_autocomplete($branch_id, $string = '') {
     }
   }
 
-  drupal_json_output($matches);
+  backdrop_json_output($matches);
 }
 
 /**
@@ -3244,8 +3220,29 @@ function api_search_autocomplete($branch_id, $string = '') {
 function api_views_api() {
   return array(
     'api' => 3,
-    'path' => drupal_get_path('module', 'api') . '/views',
-    'template path' => drupal_get_path('module', 'api') . '/views/templates',
+    'path' => backdrop_get_path('module', 'api') . '/views',
+    'template path' => backdrop_get_path('module', 'api') . '/views/templates',
+  );
+}
+
+/**
+ * Implements hook_autoload_info().
+ */
+function api_autoload_info() {
+  return array(
+    'api_views_handler_argument_partial_match' => 'views/handlers/api_views_handler_argument_partial_match.inc',
+    'api_views_handler_field_api_linkable' => 'views/handlers/api_views_handler_field_api_linkable.inc',
+    'api_views_handler_field_api_namespace' => 'views/handlers/api_views_handler_field_api_namespace.inc',
+    'api_views_handler_field_api_project' => 'views/handlers/api_views_handler_field_api_project.inc',
+    'api_views_handler_field_api_project_ops' => 'views/handlers/api_views_handler_field_api_project_ops.inc',
+    'api_views_handler_field_api_branch_ops' => 'views/handlers/api_views_handler_field_api_branch_ops.inc',
+    'api_views_handler_field_api_docs' => 'views/handlers/api_views_handler_field_api_docs.inc',
+    'api_views_handler_field_api_service_tags' => 'views/handlers/api_views_handler_field_api_service_tags.inc',
+    'api_views_handler_filter_project_name' => 'views/handlers/api_views_handler_filter_project_name.inc',
+    'api_views_handler_filter_service_tag' => 'views/handlers/api_views_handler_filter_service_tag.inc',
+    'api_views_handler_sort_title_length' => 'views/handlers/api_views_handler_sort_title_length.inc',
+    'api_views_plugin_style_dl_list' => 'views/plugins/api_views_plugin_style_dl_list.inc',
+    'api_views_join_extras' => 'views/api.views.inc',
   );
 }
 
@@ -3266,7 +3263,7 @@ function api_display_view($view_name, $display_name, $args = array()) {
   $output = '';
 
   // Load the view.
-  $view = views_get_view($view_name);
+  $view = views_get_view($view_name, TRUE);
 
   if ($view) {
     // Override the URL so that exposed filters will work on blocks even without
@@ -3335,4 +3332,33 @@ function api_full_classname($name, $namespace = array(), $use_aliases = array())
   }
 
   return $classname . $suffix;
+}
+
+/**
+ * Render a collapsible element.
+ *
+ * @param $title
+ *   The title of the collapsible.
+ * @param $content
+ *   The content of the collapsible.
+ *
+ * @return string
+ *   The rendered collaspible element as HTML.
+ */
+function api_collapsible($title, $content) {
+  // The Drupal 7 version of API module used a CTools collapsible. Until we have
+  // a core version of a collapsible or "details" element, use fieldsets.
+  $fieldset = array(
+      '#title' => $title,
+      '#type' => 'fieldset',
+      '#children' => $content,
+      '#collapsible' => TRUE,
+      '#collapsed' => TRUE,
+      '#pre_render' => array('form_pre_render_fieldset'),
+      '#parents' => array(),
+    ) + element_info('fieldset');
+  $form_state = array();
+  backdrop_add_library('system', 'backdrop.collapse');
+  form_process_fieldset($fieldset, $form_state);
+  return backdrop_render($fieldset);
 }
