@@ -2858,6 +2858,9 @@ function api_search_form($form, $form_state, $branch) {
 function api_search_form_submit($form, &$form_state) {
   $branch = $form['#branch'];
   $form_state['redirect'] = 'api/' . $branch->project . '/' . $branch->branch_name . '/search/' . $form_state['values']['search'];
+  unset($_GET['destination']);
+  drupal_static_reset('drupal_get_destination');
+  drupal_get_destination();
 }
 
 /**
@@ -3361,4 +3364,40 @@ function api_collapsible($title, $content) {
   backdrop_add_library('system', 'backdrop.collapse');
   form_process_fieldset($fieldset, $form_state);
   return backdrop_render($fieldset);
+}
+
+/**
+ * Adds the configured line break character to text.
+ *
+ * @param string $text
+ *   Text to add line breaks to, presumably a class member name or something
+ *   similar that is too long.
+ *
+ * @return string
+ *   Text with line break characters added.
+ */
+function api_add_breaks($text) {
+  static $breaks_where, $breaks_tag;
+  if (!isset($breaks_where)) {
+    $config = config('api.settings');
+    $breaks_where = $config->get('breaks_where');
+    $breaks_tag = $config->get('breaks_tag');
+  }
+
+  $where = array_filter(explode(' ', $breaks_where));
+  if (!count($where)) {
+    return $text;
+  }
+
+  if (!strlen($breaks_tag)) {
+    return $text;
+  }
+
+  $replace = array();
+  foreach ($where as $string) {
+    $replace[] = $string . $breaks_tag;
+  }
+
+  $text = str_replace($where, $replace, $text);
+  return $text;
 }

@@ -27,6 +27,7 @@ class ApiEnableTestCase extends ApiWebPagesBaseTest {
     // Start with only the support modules enabled.
     BackdropWebTestCase::setUp('node', 'dblog', 'views', 'comment');
 
+    config_set('api.settings', 'breaks_tag', '');
     $this->super_user = $this->backdropCreateUser(array(
       'access content',
       'access administration pages',
