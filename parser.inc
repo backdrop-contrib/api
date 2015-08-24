@@ -1824,7 +1824,7 @@ function api_format_php($code, &$references, $number = FALSE, $track_references 
             }
           }
           if ($track_references) {
-            if (preg_match("|^'" . DRUPAL_PHP_FUNCTION_PATTERN . "'$|", $value)) {
+            if (preg_match("|^'" . BACKDROP_PHP_FUNCTION_PATTERN . "'$|", $value)) {
               $newname = str_replace("'", '', $value);
               $references['potential callback'][$newname] = $newname;
             }

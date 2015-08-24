@@ -187,7 +187,6 @@ function api_page_admin_form($form, &$form_state) {
  */
 function api_page_admin_form_submit($form, &$form_state) {
   $config = config('api.settings');
-  $config->set('default_branch', $form_state['values']['default_branch']);
   $config->set('default_project', $form_state['values']['default_project']);
   $config->set('default_core_compatibility', $form_state['values']['default_core_compatibility']);
   $config->set('opensearch_name', $form_state['values']['opensearch_name']);
