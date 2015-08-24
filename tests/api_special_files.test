@@ -11,14 +11,6 @@ module_load_include('php', 'api', 'tests/api_test_case');
  * Tests that files containing special issues can be dealt with.
  */
 class ApiSpecialIssuesTestCase extends ApiWebPagesBaseTest {
-  public static function getInfo() {
-    return array(
-      'name' => 'Special files',
-      'description' => 'Tests that files containing two-byte Unicode characters and other special cases can be dealt with.',
-      'group' => 'API module',
-    );
-  }
-
   function setUp() {
     $this->baseSetUp();
 
