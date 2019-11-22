@@ -3415,3 +3415,14 @@ function api_add_breaks($text) {
   $text = str_replace($where, $replace, $text);
   return $text;
 }
+
+/**
+ * Implements hook_config_info().
+ */
+function api_config_info() {
+  $prefixes['api.settings'] = array(
+    'label' => t('API settings'),
+    'group' => t('Configuration'),
+  );
+  return $prefixes;
+}
