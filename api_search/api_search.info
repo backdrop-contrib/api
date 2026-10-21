@@ -2,5 +2,6 @@ name = API Search Integration
 description = Provides Search (Core and Solr) integration for API module
 package = Development
 backdrop = 1.x
+type = module
 configure = admin/config/development/api/search
 dependencies[] = api
